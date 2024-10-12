@@ -3,7 +3,7 @@ import { REALTIME_ENDPOINT, REALTIME_MODEL } from "./constants.ts"
 import type { ServerEvent } from "./ServerEvent.ts"
 
 export interface Connection {
-  send: (event: ClientEvent) => string
+  send: Send
   close: () => void
 }
 

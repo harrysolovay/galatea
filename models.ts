@@ -1,4 +1,5 @@
-import type { JsonSchema } from "./JsonSchema.ts"
+// @ts-ignore .
+import type { JSONSchema7 } from "@types/json-schema"
 
 export type SessionConfig = {
   /** The set of modalities the model can respond with. To disable audio, set this to ["text"]. */
@@ -74,7 +75,7 @@ export namespace ToolDefinition {
     /** The description of the function. */
     description: string
     /** Parameters of the function in JSON Schema. */
-    parameters: JsonSchema
+    parameters: JSONSchema7
   }
 }
 

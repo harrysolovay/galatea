@@ -15,6 +15,7 @@
     "@std/dotenv": "jsr:@std/dotenv@^0.225.2",
     "@std/encoding": "jsr:@std/encoding@^1.0.5",
     "@std/http": "jsr:@std/http@1",
+    "@types/json-schema": "npm:@types/json-schema@^7.0.15",
     "@types/react": "npm:@types/react@^18.3.11",
     "@vitejs/plugin-react": "npm:@vitejs/plugin-react@^4.3.2",
     "react": "npm:react@^18.3.1",

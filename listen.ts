@@ -1,5 +1,5 @@
 import type { ClientEvent } from "./ClientEvent.ts"
-import { connect } from "./connect.ts"
+import { connect, type Send } from "./connect.ts"
 import type { ServerEvent } from "./ServerEvent.ts"
 
 export interface ListenOptions {
@@ -40,5 +40,3 @@ export async function listen(options: ListenOptions, handlers: ListenHandlers): 
 export type ListenHandlers = {
   [K in ServerEvent["type"]]: (args: Extract<ServerEvent, { type: K }>) => void | Promise<void>
 }
-
-export type Send = (event: ClientEvent) => string
