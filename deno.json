@@ -5,7 +5,8 @@
   "lock": false,
   "tasks": {
     "mod": "deno run -A https://deno.land/x/moderate@0.0.5/mod.ts && dprint fmt",
-    "www": "deno run -A npm:vite"
+    "www": "deno run -A npm:vite",
+    "www:build": "deno run -A npm:vite build"
   },
   "imports": {
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.0",
@@ -17,9 +18,13 @@
     "@std/http": "jsr:@std/http@1",
     "@types/json-schema": "npm:@types/json-schema@^7.0.15",
     "@types/react": "npm:@types/react@^18.3.11",
+    "@types/react-dom": "npm:@types/react-dom@^18.3.1",
     "@vitejs/plugin-react": "npm:@vitejs/plugin-react@^4.3.2",
-    "react": "npm:react@^18.3.1",
-    "react-dom": "npm:react-dom@^18.3.1",
+    "@vitejs/plugin-react-swc": "npm:@vitejs/plugin-react-swc@^3.7.1",
+    "react": "https://esm.sh/react@18.3.1",
+    "react/": "https://esm.sh/react@18.3.1/",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
     "vite": "npm:vite@^5.4.8"
   },
   "lint": {
@@ -41,7 +46,6 @@
     "noPropertyAccessFromIndexSignature": false,
     "noUncheckedIndexedAccess": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "react",
-    "jsxImportSourceTypes": "@types/react"
+    "jsxImportSource": "react"
   }
 }

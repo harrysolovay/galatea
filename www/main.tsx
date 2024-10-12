@@ -1,12 +1,19 @@
-import * as React from "react"
+import { StrictMode, useState } from "react"
 import { createRoot } from "react-dom/client"
 
 createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  <StrictMode>
     <App />
-  </React.StrictMode>,
+  </StrictMode>,
 )
 
 function App() {
-  return <div>Hello</div>
+  const [count, setCount] = useState(0)
+  return (
+    <div>
+      <span>count: {count}</span>
+      <button onClick={() => setCount((value) => value++)}>Increment</button>
+      <button onClick={() => setCount((value) => value--)}>Decrement</button>
+    </div>
+  )
 }
