@@ -1,4 +1,4 @@
-import type { Flatten } from "./util.ts"
+import type { Flatten } from "./util/mod.ts"
 
 export type Event<Tree, Prefix extends string = ""> = Flatten<
   {

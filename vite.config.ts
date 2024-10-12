@@ -8,4 +8,7 @@ import "react/jsx-runtime"
 
 export default defineConfig({
   plugins: [deno(), react()],
+  build: {
+    outDir: "target/www",
+  },
 })

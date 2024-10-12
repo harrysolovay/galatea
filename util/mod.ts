@@ -10,8 +10,6 @@ export function generateId(prefix: string, length = 21): string {
   return `${prefix}${str}`
 }
 
-export const IS_BROWSER = typeof document !== "undefined"
-
 export function floatTo16BitPCM(float32Array: Float32Array): ArrayBuffer {
   const buffer = new ArrayBuffer(float32Array.length * 2)
   const view = new DataView(buffer)
@@ -21,9 +19,4 @@ export function floatTo16BitPCM(float32Array: Float32Array): ArrayBuffer {
     view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true)
   }
   return buffer
-}
-
-export function idFactory() {
-  let id = 0
-  return () => String(id++)
 }
