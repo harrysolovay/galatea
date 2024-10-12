@@ -4,12 +4,13 @@ import type { MatchEventArms } from "./event_common.ts"
 import type { ServerEvent } from "./ServerEvent.ts"
 
 export interface SessionOptions {
+  /** The OpenAI access token. */
   apiKey: string
+  /** The abort signal to be used for terminating the session. */
   signal: AbortSignal
+  /** Whether or not to log all incoming events. */
   debug?: boolean
 }
-
-export type Send = (event: ClientEvent) => string
 
 export async function session(options: SessionOptions, handlers: SessionHandlers): Promise<Send> {
   let nextEventId = 0
@@ -34,3 +35,5 @@ export async function session(options: SessionOptions, handlers: SessionHandlers
 
 // TODO: separate and have `SessionHandler`?
 export type SessionHandlers = MatchEventArms<ServerEvent, void>
+
+export type Send = (event: ClientEvent) => string
