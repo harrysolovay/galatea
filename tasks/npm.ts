@@ -3,8 +3,8 @@ import { parseArgs } from "@std/cli"
 import * as fs from "@std/fs"
 import * as path from "@std/path"
 
-const OUT_DIR = "target/npm"
-await fs.emptyDir(OUT_DIR)
+const outDir = "target/npm"
+await fs.emptyDir(outDir)
 
 const { version } = parseArgs(Deno.args, {
   string: ["version"],
@@ -15,7 +15,7 @@ const { version } = parseArgs(Deno.args, {
 
 await build({
   entryPoints: ["./mod.ts"],
-  outDir: "./npm",
+  outDir,
   shims: {
     deno: true,
     webSocket: true,
@@ -27,6 +27,8 @@ await build({
     license: "Apache-2.0",
     repository: "github:harrysolovay/galatea.git",
   },
+  typeCheck: false,
+  scriptModule: false,
 })
 
-await Promise.all(["README.md"].map((assetPath) => Deno.copyFile(assetPath, path.join(OUT_DIR, assetPath))))
+await Promise.all(["README.md"].map((assetPath) => Deno.copyFile(assetPath, path.join(outDir, assetPath))))
