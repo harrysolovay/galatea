@@ -3,7 +3,7 @@ import { REALTIME_ENDPOINT, REALTIME_MODEL } from "./constants.ts"
 import type { ServerEvent } from "./ServerEvent.ts"
 import { GalateaError } from "./util.ts"
 
-export interface ConnectionOptions {
+export interface ConnectOptions {
   /** The OpenAI access token. */
   apiKey: string
   /** The abort signal to be used for terminating the session. */
@@ -16,7 +16,7 @@ export type ListenHandlers = {
   [K in ServerEvent["type"]]: (args: Extract<ServerEvent, { type: K }>) => void | Promise<void>
 }
 
-export async function connect(options: ConnectionOptions, handlers: ListenHandlers): Promise<Send> {
+export async function connect(options: ConnectOptions, handlers: ListenHandlers): Promise<Sender> {
   const socket = new WebSocket(`${REALTIME_ENDPOINT}?model=${REALTIME_MODEL}`, [
     "realtime",
     `openai-insecure-api-key.${options.apiKey}`,
@@ -50,6 +50,16 @@ export async function connect(options: ConnectionOptions, handlers: ListenHandle
   socket.addEventListener("error", (e) => console.error(e), controller)
 
   let queue: Promise<void> = Promise.resolve()
+  const onMessage = (raw: MessageEvent) => {
+    const event: ServerEvent = JSON.parse(raw.data)
+    queue = queue.then(() => {
+      if (options.debug) {
+        if (event.type === "error") console.error(event)
+        else console.info(event)
+      }
+      return handlers[event.type](event as never)
+    })
+  }
   socket.addEventListener("message", onMessage, controller)
 
   options.signal.addEventListener("abort", () => {
@@ -64,20 +74,7 @@ export async function connect(options: ConnectionOptions, handlers: ListenHandle
   })
 
   let nextEventId = 0
-  return send
-
-  function onMessage(raw: MessageEvent) {
-    const event: ServerEvent = JSON.parse(raw.data)
-    queue = queue.then(() => {
-      if (options.debug) {
-        if (event.type === "error") console.error(event)
-        else console.info(event)
-      }
-      return handlers[event.type](event as never)
-    })
-  }
-
-  function send(event: ClientEvent) {
+  return (event: ClientEvent) => {
     const { event_id, ...rest } = event
     if (typeof event_id !== "string") {
       event = { event_id: `event_${++nextEventId}`, ...rest }
@@ -88,7 +85,7 @@ export async function connect(options: ConnectionOptions, handlers: ListenHandle
 }
 
 export type SubscribeHandler = (event: ServerEvent) => void
-export type Send = (event: ClientEvent) => string
+export type Sender = (event: ClientEvent) => string
 
 export class UnexpectedDisconnectError
   extends GalateaError("UnexpectedDisconnectError", "Underlying disconnected unexpectedly")
