@@ -4,15 +4,22 @@
   "exports": "./mod.ts",
   "lock": false,
   "tasks": {
-    "mod": "deno run -A https://deno.land/x/moderate@0.0.5/mod.ts && dprint fmt"
+    "mod": "deno run -A https://deno.land/x/moderate@0.0.5/mod.ts && dprint fmt",
+    "www": "deno run -A npm:vite"
   },
   "imports": {
+    "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.0",
     "@std/assert": "jsr:@std/assert@1",
     "@std/async": "jsr:@std/async@^1.0.6",
     "@std/cache": "jsr:@std/cache@^0.1.3",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.2",
     "@std/encoding": "jsr:@std/encoding@^1.0.5",
-    "@std/http": "jsr:@std/http@1"
+    "@std/http": "jsr:@std/http@1",
+    "@types/react": "npm:@types/react@^18.3.11",
+    "@vitejs/plugin-react": "npm:@vitejs/plugin-react@^4.3.2",
+    "react": "npm:react@^18.3.1",
+    "react-dom": "npm:react-dom@^18.3.1",
+    "vite": "npm:vite@^5.4.8"
   },
   "lint": {
     "rules": {
@@ -20,10 +27,10 @@
       "exclude": [
         "ban-types",
         "ban-untagged-todo",
+        "no-empty",
         "no-explicit-any",
         "no-inner-declarations",
-        "no-namespace",
-        "no-empty"
+        "no-namespace"
       ]
     }
   },
@@ -31,6 +38,9 @@
     "lib": ["deno.window", "dom"],
     "noFallthroughCasesInSwitch": true,
     "noPropertyAccessFromIndexSignature": false,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "jsxImportSourceTypes": "@types/react"
   }
 }

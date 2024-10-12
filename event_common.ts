@@ -14,5 +14,3 @@ export type EventBase<K> = {
   event_id?: string
   type: K
 }
-
-export type MatchEventArms<E extends EventBase<string>, R> = { [K in E["type"]]: (args: Extract<E, { type: K }>) => R }
