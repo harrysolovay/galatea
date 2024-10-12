@@ -1,9 +1,9 @@
 import { OPENAI_API_KEY } from "../env.ts"
-import { defaultSessionConfig, listen } from "../mod.ts"
+import { connect, defaultSessionConfig } from "../mod.ts"
 
 const controller = new AbortController()
 
-const send = await listen({
+const send = await connect({
   apiKey: OPENAI_API_KEY,
   signal: controller.signal,
   debug: true,
