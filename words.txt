@@ -2,6 +2,7 @@ alaw
 camelcase
 dprint
 galitea
+harrysolovay
 intf
 openai
 sqlx
