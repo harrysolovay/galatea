@@ -32,7 +32,6 @@ await build({
     importHelpers: true,
     sourceMap: true,
   },
-  declaration: "separate",
   typeCheck: false,
 })
 
