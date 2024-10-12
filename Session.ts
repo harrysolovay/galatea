@@ -14,20 +14,21 @@ export class Session<S> {
   private nextEventId = 0
   declare private sessionController?: AbortController
   declare private connection?: Connection
-  private state
-  constructor(readonly options: SessionOptions<S>, readonly handlers: SessionHandlers<S>) {
+  state
+  constructor(private options: SessionOptions<S>, private handlers: SessionHandlers<S>) {
     this.state = { ...options.initialState }
   }
 
   send(event: ClientEvent) {
-    if (!event.event_id) {
-      event = { event_id: `event_${++this.nextEventId}`, ...event }
-    }
+    let { event_id } = event
+    if (!event_id) event_id = `event_${++this.nextEventId}`
     assert(this.connection, "TODO")
     this.connection.send(event)
+    return event_id
   }
 
-  async start() {
+  // TODO: see about reusing sessions
+  async start(_sessionId?: string) {
     this.sessionController = new AbortController()
     this.connection = await connect(this.options.apiKey, { signal: this.sessionController.signal })
     this.connection.subscribe(this.tick, { signal: this.sessionController.signal })
@@ -41,7 +42,7 @@ export class Session<S> {
   // TODO
   gc() {}
 
-  tick = (event: ServerEvent) => {
+  private tick = (event: ServerEvent) => {
     if (this.options.debug) {
       if (event.type === "error") {
         console.error(event)

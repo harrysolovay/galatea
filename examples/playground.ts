@@ -1,21 +1,18 @@
 import { OPENAI_API_KEY } from "../env.ts"
 import { defaultSessionConfig, Session } from "../mod.ts"
-import { idFactory } from "../util.ts"
-
-const nextEventId = idFactory()
 
 const session = new Session({
   apiKey: OPENAI_API_KEY,
-  initialState: { hello: "world!" },
+  initialState: { isInitial: true },
   debug: true,
 }, {
   error(_e) {},
   "conversation.created"(_e) {},
   "conversation.item.created"(_e) {
     session.send({
-      event_id: nextEventId(),
       type: "response.create",
     })
+    return { isInitial: false }
   },
   "conversation.item.deleted"(_e) {},
   "conversation.item.input_audio_transcription.completed"(_e) {},
@@ -32,7 +29,9 @@ const session = new Session({
   "response.audio_transcript.done"(_e) {},
   "response.content_part.added"(_e) {},
   "response.content_part.done"(_e) {},
-  "response.created"(_e) {},
+  "response.created"(_e) {
+    console.log(session.state)
+  },
   "response.done"(_e) {},
   "response.function_call_arguments.delta"(_e) {},
   "response.function_call_arguments.done"(_e) {},
@@ -43,7 +42,6 @@ const session = new Session({
   "session.created"(_e) {},
   "session.updated"(_e) {
     session.send({
-      event_id: nextEventId(),
       type: "conversation.item.create",
       item: {
         type: "message",
@@ -60,10 +58,10 @@ const session = new Session({
 })
 
 // TODO: get rid of need for `await`ing
+console.log("Initial state:", session.state)
 await session.start()
 
 session.send({
-  event_id: nextEventId(),
   type: "session.update",
   session: defaultSessionConfig,
 })
