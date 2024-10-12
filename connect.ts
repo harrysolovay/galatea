@@ -67,10 +67,13 @@ export async function connect(options: ConnectOptions, handlers: ListenHandlers)
       controller.abort()
       socket.close()
     }
-    ;({
-      [WebSocket.CONNECTING]: () => socket.addEventListener("open", close, { once: true }),
-      [WebSocket.OPEN]: close,
-    }[socket.readyState]) || (() => {})()
+    switch (socket.readyState) {
+      case WebSocket.CONNECTING:
+        socket.addEventListener("open", close, { once: true })
+        break
+      case WebSocket.OPEN:
+        close()
+    }
   })
 
   let nextEventId = 0
