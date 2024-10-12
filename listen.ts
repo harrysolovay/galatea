@@ -3,7 +3,7 @@ import { connect } from "./connect.ts"
 import type { MatchEventArms } from "./event_common.ts"
 import type { ServerEvent } from "./ServerEvent.ts"
 
-export interface SessionOptions {
+export interface ListenOptions {
   /** The OpenAI access token. */
   apiKey: string
   /** The abort signal to be used for terminating the session. */
@@ -12,8 +12,9 @@ export interface SessionOptions {
   debug?: boolean
 }
 
-export async function session(options: SessionOptions, handlers: SessionHandlers): Promise<Send> {
+export async function listen(options: ListenOptions, handlers: ListenHandlers): Promise<Send> {
   let nextEventId = 0
+  let queue: Promise<void> = Promise.resolve()
   const connection = await connect(options.apiKey, tick)
   options.signal.addEventListener("abort", () => connection.close())
 
@@ -25,15 +26,17 @@ export async function session(options: SessionOptions, handlers: SessionHandlers
   }
 
   function tick(event: ServerEvent) {
-    if (options.debug) {
-      if (event.type === "error") console.error(event)
-      else console.info(event)
-    }
-    handlers[event.type](event as never)
+    queue = queue.then(() => {
+      if (options.debug) {
+        if (event.type === "error") console.error(event)
+        else console.info(event)
+      }
+      handlers[event.type](event as never)
+    })
   }
 }
 
 // TODO: separate and have `SessionHandler`?
-export type SessionHandlers = MatchEventArms<ServerEvent, void>
+export type ListenHandlers = MatchEventArms<ServerEvent, void>
 
 export type Send = (event: ClientEvent) => string
