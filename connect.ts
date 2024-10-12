@@ -2,19 +2,12 @@ import type { ClientEvent } from "./ClientEvent.ts"
 import { REALTIME_ENDPOINT, REALTIME_MODEL } from "./constants.ts"
 import type { ServerEvent } from "./ServerEvent.ts"
 
-export class Connection {
-  constructor(readonly socket: WebSocket) {}
-
-  send(event: ClientEvent) {
-    this.socket.send(JSON.stringify(event))
-  }
-
-  subscribe(handler: SubscribeHandler, options: SubscriptionOptions) {
-    this.socket.addEventListener("message", (e) => handler(JSON.parse(e.data)), { signal: options.signal })
-  }
+export interface Connection {
+  send: (event: ClientEvent) => string
+  close: () => void
 }
 
-export async function connect(apiKey: string, options: ConnectOptions) {
+export async function connect(apiKey: string, handler: SubscribeHandler): Promise<Connection> {
   const socket = new WebSocket(`${REALTIME_ENDPOINT}?model=${REALTIME_MODEL}`, [
     "realtime",
     `openai-insecure-api-key.${apiKey}`,
@@ -44,28 +37,31 @@ export async function connect(apiKey: string, options: ConnectOptions) {
     }
   }
 
-  options.signal.addEventListener(
-    "abort",
-    {
-      [WebSocket.CONNECTING]: () => socket.addEventListener("open", () => socket.close(), { once: true }),
-      [WebSocket.OPEN]: () => socket.close(),
-    }[socket.readyState] || (() => {}),
-  )
+  const controller = new AbortController()
+  socket.addEventListener("error", (e) => console.error(e), controller)
+  socket.addEventListener("message", (e) => handler(JSON.parse(e.data)), controller)
 
-  socket.addEventListener("error", (e) => {
-    console.error(e)
-    throw 0
-  }, { signal: options.signal })
+  let nextEventId = 0
 
-  return new Connection(socket)
+  const close = {
+    [WebSocket.CONNECTING]: () => {
+      socket.addEventListener("open", () => socket.close(), { once: true })
+    },
+    [WebSocket.OPEN]: () => {
+      socket.close()
+    },
+  }[socket.readyState] || (() => {})
+
+  return {
+    send: (event) => {
+      let { event_id } = event
+      if (!event_id) event_id = `event_${++nextEventId}`
+      socket.send(JSON.stringify(event))
+      return event_id
+    },
+    close,
+  }
 }
 
 export type SubscribeHandler = (event: ServerEvent) => void
-
-export interface SubscriptionOptions {
-  signal: AbortSignal
-}
-
-export interface ConnectOptions {
-  signal: AbortSignal
-}
+export type Send = (event: ClientEvent) => string

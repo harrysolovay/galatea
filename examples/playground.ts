@@ -1,18 +1,19 @@
 import { OPENAI_API_KEY } from "../env.ts"
-import { defaultSessionConfig, Session } from "../mod.ts"
+import { defaultSessionConfig, session } from "../mod.ts"
 
-const session = new Session({
+const controller = new AbortController()
+
+const send = await session({
   apiKey: OPENAI_API_KEY,
-  initialState: { isInitial: true },
+  signal: controller.signal,
   debug: true,
 }, {
-  error(_e) {},
+  error(event) {
+    console.error(event)
+  },
   "conversation.created"(_e) {},
   "conversation.item.created"(_e) {
-    session.send({
-      type: "response.create",
-    })
-    return { isInitial: false }
+    send({ type: "response.create" })
   },
   "conversation.item.deleted"(_e) {},
   "conversation.item.input_audio_transcription.completed"(_e) {},
@@ -30,7 +31,7 @@ const session = new Session({
   "response.content_part.added"(_e) {},
   "response.content_part.done"(_e) {},
   "response.created"(_e) {
-    console.log(session.state)
+    console.log(this)
   },
   "response.done"(_e) {},
   "response.function_call_arguments.delta"(_e) {},
@@ -41,7 +42,7 @@ const session = new Session({
   "response.text.done"(_e) {},
   "session.created"(_e) {},
   "session.updated"(_e) {
-    session.send({
+    send({
       type: "conversation.item.create",
       item: {
         type: "message",
@@ -49,7 +50,7 @@ const session = new Session({
         content: [
           {
             type: "input_text",
-            text: "Hey, are you there?",
+            text: "Tell me about Galatea from the story of Pygmalion.",
           },
         ],
       },
@@ -57,11 +58,7 @@ const session = new Session({
   },
 })
 
-// TODO: get rid of need for `await`ing
-console.log("Initial state:", session.state)
-await session.start()
-
-session.send({
+send({
   type: "session.update",
   session: defaultSessionConfig,
 })
