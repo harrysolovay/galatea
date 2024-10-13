@@ -20,6 +20,12 @@ await build({
     deno: true,
     webSocket: true,
   },
+  scriptModule: false,
+  compilerOptions: {
+    importHelpers: true,
+    sourceMap: true,
+  },
+  typeCheck: false,
   package: {
     name: "galatea",
     version,
@@ -27,12 +33,6 @@ await build({
     license: "Apache-2.0",
     repository: "github:harrysolovay/galatea.git",
   },
-  scriptModule: false,
-  compilerOptions: {
-    importHelpers: true,
-    sourceMap: true,
-  },
-  typeCheck: false,
 })
 
 await Promise.all(["README.md"].map((assetPath) => Deno.copyFile(assetPath, path.join(outDir, assetPath))))

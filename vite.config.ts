@@ -8,7 +8,9 @@ import "react/jsx-dev-runtime"
 
 export default defineConfig({
   plugins: [deno(), react()],
+  root: "www",
+  publicDir: "assets",
   build: {
-    outDir: "target/www",
+    outDir: "../target/www",
   },
 })

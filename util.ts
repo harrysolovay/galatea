@@ -20,12 +20,3 @@ export function floatTo16BitPCM(float32Array: Float32Array): ArrayBuffer {
   }
   return buffer
 }
-
-export function GalateaError<K extends string>(name: K, message: string) {
-  return class extends Error {
-    override readonly name = name
-    constructor() {
-      super(message)
-    }
-  }
-}

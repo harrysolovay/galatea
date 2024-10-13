@@ -1,25 +1,16 @@
 import type { ClientEvent } from "./ClientEvent.ts"
+import type { Config } from "./config.ts"
 import { REALTIME_ENDPOINT, REALTIME_MODEL } from "./constants.ts"
 import type { ServerEvent } from "./ServerEvent.ts"
-import { GalateaError } from "./util.ts"
-
-export interface ConnectOptions {
-  /** The OpenAI access token. */
-  apiKey: string
-  /** The abort signal to be used for terminating the session. */
-  signal: AbortSignal
-  /** Whether or not to log all incoming events. */
-  debug?: boolean
-}
 
 export type ListenHandlers = {
   [K in ServerEvent["type"]]: (args: Extract<ServerEvent, { type: K }>) => void | Promise<void>
 }
 
-export async function connect(options: ConnectOptions, handlers: ListenHandlers): Promise<Sender> {
+export async function connect(config: Config, handlers: ListenHandlers): Promise<Sender> {
   const socket = new WebSocket(`${REALTIME_ENDPOINT}?model=${REALTIME_MODEL}`, [
     "realtime",
-    `openai-insecure-api-key.${options.apiKey}`,
+    `openai-insecure-api-key.${config.apiKey}`,
     "openai-beta.realtime-v1",
   ])
 
@@ -53,7 +44,7 @@ export async function connect(options: ConnectOptions, handlers: ListenHandlers)
   const onMessage = (raw: MessageEvent) => {
     const event: ServerEvent = JSON.parse(raw.data)
     queue = queue.then(() => {
-      if (options.debug) {
+      if (config.debug) {
         if (event.type === "error") console.error(event)
         else console.info(event)
       }
@@ -62,7 +53,7 @@ export async function connect(options: ConnectOptions, handlers: ListenHandlers)
   }
   socket.addEventListener("message", onMessage, controller)
 
-  options.signal.addEventListener("abort", () => {
+  config.signal.addEventListener("abort", () => {
     const close = () => {
       controller.abort()
       socket.close()
@@ -90,6 +81,7 @@ export async function connect(options: ConnectOptions, handlers: ListenHandlers)
 export type SubscribeHandler = (event: ServerEvent) => void
 export type Sender = (event: ClientEvent) => string
 
-export class UnexpectedDisconnectError
-  extends GalateaError("UnexpectedDisconnectError", "Underlying disconnected unexpectedly")
-{}
+export class UnexpectedDisconnectError extends Error {
+  override readonly name = "UnexpectedDisconnectError"
+  override message = "Underlying websocket disconnected unexpectedly."
+}
