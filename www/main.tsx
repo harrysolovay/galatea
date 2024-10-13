@@ -1,3 +1,4 @@
+import * as React from "react" // TODO: rid
 import { StrictMode, useState } from "react"
 import { createRoot } from "react-dom/client"
 
