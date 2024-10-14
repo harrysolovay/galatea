@@ -1,15 +1,16 @@
-export type Added = {
-  response_id: string
-  item_id: string
-  output_index: number
-  content_index: number
-  part: T.Content
-}
+import type { ContentResource } from "../common/mod.ts"
+
+export type Added = Done
 
 export type Done = {
+  /** The ID of the response. */
   response_id: string
-  item_id: string
+  /** The index of the output item in the response. */
   output_index: number
+  /** The ID of the item. */
+  item_id: string
+  /** The index of the content part in the item's content array. */
   content_index: number
-  part: T.Content
+  /** The content part that is done. */
+  part: ContentResource
 }
