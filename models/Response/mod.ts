@@ -1,4 +1,4 @@
-import type { Response, ResponseResource } from "../common/mod.ts"
+import type { ResponseConfig, ResponseResource } from "../common/mod.ts"
 
 export * as Audio from "./Audio.ts"
 export * as AudioTranscript from "./AudioTranscript.ts"
@@ -9,7 +9,7 @@ export * as Text from "./Text.ts"
 
 export type Create = {
   /** Configuration for the response. */
-  response: Response
+  response: ResponseConfig
 }
 
 export type Created = {

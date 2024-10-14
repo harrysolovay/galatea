@@ -1,4 +1,5 @@
 export * from "./ClientEvent.ts"
+export * from "./common/mod.ts"
 export * as Conversation from "./Conversation/mod.ts"
 export * from "./Error.ts"
 export * as InputAudioBuffer from "./InputAudioBuffer.ts"

@@ -52,21 +52,7 @@ export async function conversation(config: Config) {
     "response.text.delta"() {},
     "response.text.done"() {},
     "session.created"() {},
-    "session.updated"() {
-      send({
-        type: "conversation.item.create",
-        item: {
-          type: "message",
-          role: "system",
-          content: [
-            {
-              type: "input_text",
-              text: "Tell me about Galatea from the story of Pygmalion.",
-            },
-          ],
-        },
-      })
-    },
+    "session.updated"() {},
   })
 
   send({

@@ -1,7 +1,10 @@
 import { OPENAI_API_KEY } from "../env.ts"
 import { defaults, Session } from "../mod.ts"
+import { idFactory } from "../util.ts"
 
 const controller = new AbortController()
+
+const nextItemId = idFactory("item")
 
 const send = await Session({
   apiKey: OPENAI_API_KEY,
@@ -46,7 +49,9 @@ const send = await Session({
       type: "conversation.item.create",
       item: {
         type: "message",
-        role: "system",
+        id: nextItemId(),
+        status: "completed",
+        role: "user",
         content: [
           {
             type: "input_text",

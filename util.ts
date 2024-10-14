@@ -34,3 +34,8 @@ export function base64EncodeAudio(float32Array: Float32Array) {
   }
   return btoa(binary)
 }
+
+export function idFactory(prefix: string) {
+  let i = 0
+  return () => `${prefix}_${i++}`
+}

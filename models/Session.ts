@@ -1,8 +1,8 @@
-import type { Session, SessionResource } from "./common/mod.ts"
+import type { SessionConfig, SessionResource } from "./common/mod.ts"
 
 export type Update = {
   /** Session configuration to update. */
-  session: Session
+  session: SessionConfig
 }
 
 export type Created = {

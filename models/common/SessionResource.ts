@@ -39,5 +39,5 @@ export type SessionResource = {
   /** Sampling temperature. */
   temperature: number
   /** Maximum number of output tokens. */
-  max_output_tokens: MaxOutputTokens
+  max_response_output_tokens: MaxOutputTokens
 }

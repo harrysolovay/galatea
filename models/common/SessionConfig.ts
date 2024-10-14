@@ -7,7 +7,7 @@ import type { ToolDefinition } from "./ToolDefinition.ts"
 import type { TurnDetection } from "./TurnDetection.ts"
 import type { Voice } from "./Voice.ts"
 
-export type Session = {
+export type SessionConfig = {
   /** The set of modalities the model can respond with. To disable audio, set this to ["text"]. */
   modalities: Modality[]
   /** The default system instructions prepended to model calls. */
@@ -29,5 +29,5 @@ export type Session = {
   /** Sampling temperature for the model. */
   temperature: number
   /** Maximum number of output tokens for a single assistant response, inclusive of tool calls. Provide an integer between 1 and 4096 to limit output tokens, or "inf" for the maximum available tokens for a given model. Defaults to "inf". */
-  max_output_tokens?: MaxOutputTokens
+  max_response_output_tokens?: MaxOutputTokens
 }

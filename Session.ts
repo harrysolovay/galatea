@@ -1,6 +1,6 @@
 import type { Config } from "./config.ts"
 import { REALTIME_ENDPOINT, REALTIME_MODEL, realtimeHeaders } from "./constants.ts"
-import type { ClientEvent, ServerEvent, ServerEvents } from "./events/mod.ts"
+import type { ClientEvent, ServerEvent, ServerEvents } from "./models/mod.ts"
 
 export type Session = (event: ClientEvent) => void
 
