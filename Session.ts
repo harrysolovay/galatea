@@ -1,17 +1,17 @@
-import type { ClientEvent } from "./ClientEvent.ts"
 import type { Config } from "./config.ts"
-import { REALTIME_ENDPOINT, REALTIME_MODEL } from "./constants.ts"
-import type { ServerEvent } from "./ServerEvent.ts"
+import { REALTIME_ENDPOINT, REALTIME_MODEL, realtimeHeaders } from "./constants.ts"
+import type { ClientEvent, ServerEvent, ServerEvents } from "./events/mod.ts"
 
-export type ListenHandlers = {
-  [K in ServerEvent["type"]]: (args: Extract<ServerEvent, { type: K }>) => void | Promise<void>
+export type Session = (event: ClientEvent) => void
+
+export type Handlers = {
+  [K in keyof ServerEvents]: (args: ServerEvents[K]) => void | Promise<void>
 }
 
-export async function connect(config: Config, handlers: ListenHandlers): Promise<Sender> {
+export async function Session(config: Config, handlers: Handlers): Promise<Session> {
   const socket = new WebSocket(`${REALTIME_ENDPOINT}?model=${REALTIME_MODEL}`, [
     "realtime",
-    `openai-insecure-api-key.${config.apiKey}`,
-    "openai-beta.realtime-v1",
+    ...Object.entries(realtimeHeaders(config.apiKey)).map(([k, v]) => `${k}.${v}`),
   ])
 
   switch (socket.readyState) {
@@ -67,19 +67,8 @@ export async function connect(config: Config, handlers: ListenHandlers): Promise
     }
   })
 
-  let nextEventId = 0
-  return (event: ClientEvent) => {
-    const { event_id, ...rest } = event
-    if (typeof event_id !== "string") {
-      event = { event_id: `event_${++nextEventId}`, ...rest }
-    }
-    socket.send(JSON.stringify(event))
-    return event.event_id!
-  }
+  return (event) => socket.send(JSON.stringify(event))
 }
-
-export type SubscribeHandler = (event: ServerEvent) => void
-export type Sender = (event: ClientEvent) => string
 
 export class UnexpectedDisconnectError extends Error {
   override readonly name = "UnexpectedDisconnectError"

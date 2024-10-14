@@ -6,4 +6,6 @@ harrysolovay
 intf
 openai
 sqlx
+tsdoc
+tsdocs
 ulaw
