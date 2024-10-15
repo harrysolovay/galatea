@@ -1,5 +1,4 @@
 import type { Config } from "./config.ts"
-import { REALTIME_ENDPOINT, REALTIME_MODEL, realtimeHeaders } from "./constants.ts"
 import type { ClientEvent, ServerEvent, ServerEvents } from "./models/mod.ts"
 
 export type Session = (event: ClientEvent) => void
@@ -8,12 +7,7 @@ export type Handlers = {
   [K in keyof ServerEvents]: (args: ServerEvents[K]) => void | Promise<void>
 }
 
-export async function Session(config: Config, handlers: Handlers): Promise<Session> {
-  const socket = new WebSocket(`${REALTIME_ENDPOINT}?model=${REALTIME_MODEL}`, [
-    "realtime",
-    ...Object.entries(realtimeHeaders(config.apiKey)).map(([k, v]) => `${k}.${v}`),
-  ])
-
+export async function Session({ socket, signal, debug }: Config, handlers: Handlers): Promise<Session> {
   switch (socket.readyState) {
     case WebSocket.CLOSED:
     case WebSocket.CLOSING:
@@ -44,7 +38,7 @@ export async function Session(config: Config, handlers: Handlers): Promise<Sessi
   const onMessage = (raw: MessageEvent) => {
     const event: ServerEvent = JSON.parse(raw.data)
     queue = queue.then(() => {
-      if (config.debug) {
+      if (debug) {
         if (event.type === "error") console.error(event)
         else console.info(event)
       }
@@ -53,7 +47,7 @@ export async function Session(config: Config, handlers: Handlers): Promise<Sessi
   }
   socket.addEventListener("message", onMessage, controller)
 
-  config.signal.addEventListener("abort", () => {
+  signal.addEventListener("abort", () => {
     const close = () => {
       controller.abort()
       socket.close()

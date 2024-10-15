@@ -1,4 +1,4 @@
-import type { Flatten, U2I } from "../util.ts"
+import type { Flatten, U2I } from "../util/mod.ts"
 
 // TODO: get tsdocs to flow through.
 export type Events<Tree, Prefix extends string = ""> = Flatten<

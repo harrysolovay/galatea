@@ -18,10 +18,6 @@ interface ConversationState {
 }
 
 export async function conversation(config: Config) {
-  // const state: ConversationState = {
-  //   audioBuffer: new Int16Array(),
-  // }
-
   const send = await Session(config, {
     error() {},
     "conversation.created"({ conversation }) {},

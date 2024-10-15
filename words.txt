@@ -4,7 +4,9 @@ dprint
 galitea
 harrysolovay
 intf
+nullary
 openai
+proxied
 sqlx
 tsdoc
 tsdocs

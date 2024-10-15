@@ -1,12 +1,11 @@
-import { OPENAI_API_KEY } from "../env.ts"
-import { defaults, realtimeSocket, Session } from "../mod.ts"
-import { idFactory } from "../util/mod.ts"
+import { defaults, Session } from "../../mod.ts"
+import { idFactory } from "../../util/mod.ts"
 
 const controller = new AbortController()
 const nextItemId = idFactory("item")
 
 const send = await Session({
-  socket: realtimeSocket(OPENAI_API_KEY),
+  socket: new WebSocket("ws://localhost:4646"),
   signal: controller.signal,
   debug: true,
 }, {
