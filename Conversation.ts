@@ -1,7 +1,7 @@
 import type { Config } from "./config.ts"
 import * as D from "./defaults.ts"
 import type * as T from "./models/mod.ts"
-import { Session } from "./Session.ts"
+import { Send } from "./Session.ts"
 
 interface ConversationState {
   audioBuffer: Int16Array

@@ -1,6 +1,6 @@
 import { decoders } from "audio-decode"
 import { OPENAI_API_KEY } from "../env.ts"
-import { Session } from "../Session.ts"
+import { Send } from "../Session.ts"
 import { base64EncodeAudio } from "../util/mod.ts"
 
 const controller = new AbortController()

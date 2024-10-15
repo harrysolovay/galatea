@@ -1,14 +1,10 @@
 import { defaults, Session } from "../../mod.ts"
 import { idFactory } from "../../util/mod.ts"
 
-const controller = new AbortController()
 const nextItemId = idFactory("item")
 
-const send = await Session({
-  socket: new WebSocket("ws://localhost:4646"),
-  signal: controller.signal,
-  debug: true,
-}, {
+const socket = new WebSocket("ws://localhost:4646")
+const send = await Session({ socket, debug: true }, {
   error() {},
   "conversation.created"() {},
   "conversation.item.created"() {},

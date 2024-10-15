@@ -3,8 +3,6 @@ import { REALTIME_ENDPOINT, REALTIME_MODEL, realtimeHeaders } from "./constants.
 export interface Config {
   /** A nullary function which returns a new realtime-API-compliant web socket. */
   socket: WebSocket
-  /** The abort signal to be used for terminating the session. */
-  signal: AbortSignal
   /** Whether or not to log all incoming events. */
   debug?: boolean
 }

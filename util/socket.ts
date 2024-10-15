@@ -27,3 +27,33 @@ function setup(a: WebSocket, b: WebSocket) {
     }
   })
 }
+
+export async function socketOpen(socket: WebSocket): Promise<void> {
+  switch (socket.readyState) {
+    case WebSocket.CLOSED:
+    case WebSocket.CLOSING:
+      throw new UnexpectedDisconnectError()
+    case WebSocket.CONNECTING: {
+      const pending = Promise.withResolvers<void>()
+      const controller = new AbortController()
+      socket.addEventListener("open", onEvent, controller)
+      socket.addEventListener("close", onError, controller)
+      socket.addEventListener("error", onError, controller)
+      await pending.promise
+
+      function onEvent() {
+        controller.abort()
+        pending.resolve()
+      }
+      function onError() {
+        onEvent()
+        throw new UnexpectedDisconnectError()
+      }
+    }
+  }
+}
+
+export class UnexpectedDisconnectError extends Error {
+  override readonly name = "UnexpectedDisconnectError"
+  override message = "Underlying websocket disconnected unexpectedly."
+}

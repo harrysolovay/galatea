@@ -1,5 +1,6 @@
 import type { Config } from "./config.ts"
 import type { ClientEvent, ServerEvent, ServerEvents } from "./models/mod.ts"
+import { socketOpen } from "./util/mod.ts"
 
 export type Session = (event: ClientEvent) => void
 
@@ -7,35 +8,24 @@ export type Handlers = {
   [K in keyof ServerEvents]: (args: ServerEvents[K]) => void | Promise<void>
 }
 
-export async function Session({ socket, signal, debug }: Config, handlers: Handlers): Promise<Session> {
-  switch (socket.readyState) {
-    case WebSocket.CLOSED:
-    case WebSocket.CLOSING:
-      throw new UnexpectedDisconnectError()
-    case WebSocket.CONNECTING: {
-      const pending = Promise.withResolvers<void>()
-      const controller = new AbortController()
-      socket.addEventListener("open", onEvent, controller)
-      socket.addEventListener("close", onError, controller)
-      socket.addEventListener("error", onError, controller)
-      await pending.promise
-
-      function onEvent() {
-        controller.abort()
-        pending.resolve()
-      }
-      function onError() {
-        onEvent()
-        throw new UnexpectedDisconnectError()
-      }
-    }
-  }
-
+export async function Session({ socket, debug }: Config, handlers: Handlers): Promise<Session> {
   const controller = new AbortController()
-  socket.addEventListener("error", (e) => console.error(e), controller)
+  const { signal } = controller
 
+  socket.addEventListener("message", onMessage(handlers, debug), controller)
+
+  const terminalOptions: AddEventListenerOptions = { once: true, signal }
+  socket.addEventListener("error", (e) => controller.abort(e), terminalOptions)
+  socket.addEventListener("close", () => controller.abort(), terminalOptions)
+
+  await socketOpen(socket)
+  return (event) => socket.send(JSON.stringify(event))
+}
+
+function onMessage(handlers: Handlers, debug?: boolean) {
   let queue: Promise<void> = Promise.resolve()
-  const onMessage = (raw: MessageEvent) => {
+
+  return (raw: MessageEvent) => {
     const event: ServerEvent = JSON.parse(raw.data)
     queue = queue.then(() => {
       if (debug) {
@@ -45,26 +35,4 @@ export async function Session({ socket, signal, debug }: Config, handlers: Handl
       return handlers[event.type](event as never)
     })
   }
-  socket.addEventListener("message", onMessage, controller)
-
-  signal.addEventListener("abort", () => {
-    const close = () => {
-      controller.abort()
-      socket.close()
-    }
-    switch (socket.readyState) {
-      case WebSocket.CONNECTING:
-        socket.addEventListener("open", close, { once: true })
-        break
-      case WebSocket.OPEN:
-        close()
-    }
-  })
-
-  return (event) => socket.send(JSON.stringify(event))
-}
-
-export class UnexpectedDisconnectError extends Error {
-  override readonly name = "UnexpectedDisconnectError"
-  override message = "Underlying websocket disconnected unexpectedly."
 }
