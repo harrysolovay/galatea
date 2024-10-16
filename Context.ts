@@ -1,7 +1,6 @@
-import type { ContentResource, ItemResource, ResponseResource, SessionConfig } from "./models/mod.ts"
-import type { Segment } from "./Segment.ts"
+import type { ContentResource, ItemResource, ResponseResource, SessionConfig, ToolDefinition } from "./models/mod.ts"
 
-export class Context {
+export class ConversationState {
   sessionConfig: SessionConfig = {
     modalities: ["audio", "text"],
     instructions: "",
@@ -21,6 +20,9 @@ export class Context {
     input_audio_transcription: null,
   }
 
+  // TODO: cleanup
+  tools = new WeakMap<ToolDefinition, Function>()
+
   itemLookup: Record<string, ItemResource> = {}
   items: ItemResource[] = []
   responseLookup: Record<string, ResponseResource> = {}
@@ -29,5 +31,4 @@ export class Context {
   queuedTranscript: string = ""
   queuedTranscriptItems: Extract<ItemResource.Message, { content: ContentResource.Text[] }>[] = []
   queuedInputAudio = new Int16Array()
-  declare controller: ReadableStreamDefaultController<Segment>
 }

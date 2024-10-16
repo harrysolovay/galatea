@@ -1,23 +1,10 @@
 import { Client } from "../../mod.ts"
-import { id } from "../../util/mod.ts"
 
-const conversation = Client(new WebSocket("ws://localhost:4646"))
+const client = new Client(new WebSocket("ws://localhost:4646"))
 ;(async () => {
-  for await (const segment of conversation) {
-    console.log(segment)
-  }
+  for await (const line of client.transcript) console.log(line)
 })()
 
-conversation.send({
-  type: "conversation.item.create",
-  item: {
-    id: id("item"),
-    type: "message",
-    role: "user",
-    status: "completed",
-    content: [{
-      type: "input_text",
-      text: "Tell me about Galatea from the story of Pygmalion.",
-    }],
-  },
-})
+await client.ensureTurnDetection(false)
+await client.appendText("user", "Tell me about Galatea from the story of Pygmalion.")
+await client.commit()
