@@ -10,6 +10,20 @@ const session = Client(realtimeSocket(key))
   for await (const chunk of session) console.log(chunk)
 })()
 
+session.tool({
+  name: "",
+  description: "",
+  params: {
+    type: "object",
+    properties: {
+      a: { type: "number" },
+      b: { type: "number" },
+    },
+    required: ["a", "b"],
+  },
+  f: ({ a, b }) => console.log(a + b),
+})
+
 // state.send({
 //   type: "session.update",
 //   session: SessionConfig({ turn_detection: null }),

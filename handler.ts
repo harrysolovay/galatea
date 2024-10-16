@@ -1,7 +1,18 @@
-import type { ServerEvents } from "../event/mod.ts"
-import type { Handler } from "./handler_util.ts"
+import type { Context } from "./Context.ts"
+import type { ServerEvent, ServerEvents } from "./events/mod.ts"
 
-export const handlers: { [K in keyof ServerEvents]: Handler<K> } = {
+export function createHandler(ctx: Context) {
+  let queue: Promise<void> = Promise.resolve()
+  return ({ data }: MessageEvent<string>) => {
+    const event: ServerEvent = JSON.parse(data)
+    queue = queue.then(() => {
+      console.log(event)
+      return handlers[event.type].call(ctx, event as never)
+    })
+  }
+}
+
+const handlers: Handlers = {
   error() {},
   "conversation.created"() {},
   "conversation.item.created"() {},
@@ -31,3 +42,6 @@ export const handlers: { [K in keyof ServerEvents]: Handler<K> } = {
   "session.created"() {},
   "session.updated"() {},
 }
+
+type Handlers = { [K in keyof ServerEvents]: Handler<K> }
+type Handler<K extends keyof ServerEvents> = (this: Context, args: ServerEvents[K]) => void | Promise<void>

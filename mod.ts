@@ -1,5 +1,5 @@
 export * from "./Client.ts"
 export * from "./config.ts"
-export * from "./event/mod.ts"
+export * from "./events/mod.ts"
 export * from "./models/mod.ts"
 export { id } from "./util/mod.ts"
