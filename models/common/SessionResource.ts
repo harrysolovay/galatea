@@ -26,12 +26,14 @@ export type SessionResource = {
   /** The format of output audio. */
   output_audio_format: AudioFormat
   /** Configuration for input audio transcription. */
-  input_audio_transcription: AudioTranscription & {
-    /** Whether input audio transcription is enabled. */
-    enabled: boolean
-  }
+  input_audio_transcription:
+    | (AudioTranscription & {
+      /** Whether input audio transcription is enabled. */
+      enabled: boolean
+    })
+    | null
   /** Configuration for turn detection. */
-  turn_detection: TurnDetection
+  turn_detection: TurnDetection | null
   /** Tools (functions) available to the model. */
   tools: ToolDefinition[]
   /** How the model chooses tools. */

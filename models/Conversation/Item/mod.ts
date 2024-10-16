@@ -25,7 +25,7 @@ export type Delete = {
 
 export type Created = {
   /** The ID of the preceding item. */
-  previous_item_id: string
+  previous_item_id: string | null
   /** The item that was created. */
   item: ItemResource
 }

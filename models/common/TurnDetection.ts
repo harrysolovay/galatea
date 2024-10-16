@@ -1,10 +1,7 @@
 // TODO: check if the runtime SessionResource `none` case contains a tagged object or simply an empty field.
 // If empty field, then update `SessionResource.turn_detection` and `Session.turn_detection` accordingly.
-export type TurnDetection = TurnDetection.ServerVAD | TurnDetection.None
+export type TurnDetection = TurnDetection.ServerVAD
 export namespace TurnDetection {
-  export type None = {
-    type: "none"
-  }
   export type ServerVAD = {
     type: "server_vad"
     /** Activation threshold for VAD. */

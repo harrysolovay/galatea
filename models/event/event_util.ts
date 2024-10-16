@@ -1,4 +1,4 @@
-import type { Flatten, U2I } from "../util/mod.ts"
+import type { Flatten, U2I } from "../../util/mod.ts"
 
 // TODO: get tsdocs to flow through.
 export type Events<Tree, Prefix extends string = ""> = Flatten<
@@ -13,7 +13,7 @@ export type Events<Tree, Prefix extends string = ""> = Flatten<
 export type N<T extends Record<string, unknown>> = { [namespace_]: T }
 declare const namespace_: unique symbol
 
-type EventBase<K extends string> = {
+export type EventBase<K extends string = string> = {
   type: K
   /** Optional client-generated ID used to identify this event. */
   event_id?: string

@@ -6,11 +6,11 @@ export namespace Item {
   export type Message = Message.System | Message.User | Message.Assistant
   // TODO: ensure second type args / content types are correct.
   export namespace Message {
-    export type System = MessageItemBase<"system", Content.Text>
+    export type System = MessageItemBase<"system", Content>
 
     export type User = MessageItemBase<"user", Content>
 
-    export type Assistant = MessageItemBase<"assistant", Content.Text>
+    export type Assistant = MessageItemBase<"assistant", Content>
   }
 
   export type FunctionCall = ItemBase<"function_call"> & {

@@ -1,4 +1,4 @@
+export * from "./Client.ts"
 export * from "./config.ts"
-export * as defaults from "./defaults.ts"
-export type * as models from "./models/mod.ts"
-export * from "./Session.ts"
+export * from "./models/mod.ts"
+export { id } from "./util/mod.ts"

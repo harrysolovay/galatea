@@ -2,6 +2,7 @@
 
 export * from "./AudioFormat.ts"
 export * from "./AudioTranscription.ts"
+export * from "./CompletionTokenDetails.ts"
 export * from "./Content.ts"
 export * from "./ContentResource.ts"
 export * from "./ConversationResource.ts"

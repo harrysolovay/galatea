@@ -1,6 +1,6 @@
-import type { models } from "../mod.ts"
+import type { ToolDefinition } from "../mod.ts"
 
-const _y: models.ToolDefinition = {
+const _y: ToolDefinition = {
   type: "function",
   name: "",
   description: "",

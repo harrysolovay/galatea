@@ -2,14 +2,7 @@ export function requestsSocketUpgrade(req: Request) {
   return req.headers.get("upgrade") === "websocket"
 }
 
-export function proxySocket(req: Request, proxied: WebSocket) {
-  const { socket: client, response } = Deno.upgradeWebSocket(req)
-  setup(client, proxied)
-  setup(proxied, client)
-  return response
-}
-
-function setup(a: WebSocket, b: WebSocket) {
+export function proxySocket(a: WebSocket, b: WebSocket) {
   const ready = Promise.withResolvers<void>()
   b.addEventListener("open", () => ready.resolve())
   a.addEventListener("close", (e) => {
