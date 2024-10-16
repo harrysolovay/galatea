@@ -1,4 +1,4 @@
-import type { ServerEvents } from "../models/mod.ts"
+import type { ServerEvents } from "../event/mod.ts"
 import type { Handler } from "./handler_util.ts"
 
 export const handlers: { [K in keyof ServerEvents]: Handler<K> } = {

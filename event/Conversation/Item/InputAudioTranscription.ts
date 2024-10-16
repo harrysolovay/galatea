@@ -1,4 +1,4 @@
-import type { ErrorDetails } from "../../common/mod.ts"
+import type { ErrorDetails } from "../../../models/mod.ts"
 
 export type Completed = {
   /** The ID of the user message item. */

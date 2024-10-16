@@ -1,4 +1,4 @@
-import type { ConversationResource } from "../common/mod.ts"
+import type { ConversationResource } from "../../models/mod.ts"
 
 export * as Item from "./Item/mod.ts"
 

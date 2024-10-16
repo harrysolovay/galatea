@@ -1,7 +1,6 @@
 import { Context } from "./Context.ts"
 import { handlers } from "./handlers/mod.ts"
-import type { ServerEvent } from "./mod.ts"
-import type { ClientEvent } from "./models/mod.ts"
+import type { ClientEvent, ServerEvent } from "./mod.ts"
 import type { Segment } from "./Segment.ts"
 
 export interface Client extends ReadableStream<Segment> {

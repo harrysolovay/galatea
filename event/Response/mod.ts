@@ -1,4 +1,4 @@
-import type { ResponseConfig, ResponseResource } from "../../common/mod.ts"
+import type { ResponseConfig, ResponseResource } from "../../models/mod.ts"
 
 export * as Audio from "./Audio.ts"
 export * as AudioTranscript from "./AudioTranscript.ts"

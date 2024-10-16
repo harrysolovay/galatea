@@ -1,7 +1,6 @@
 import type * as Conversation from "./Conversation/mod.ts"
-import type { Events, N } from "./event/event_util.ts"
-import type * as InputAudioBuffer from "./event/InputAudioBuffer.ts"
-import type * as Session from "./event/Session.ts"
+import type { InputAudioBuffer, Session } from "./event_data.ts"
+import type { Events, N } from "./event_util.ts"
 
 export type ClientEvent<K extends keyof ClientEvents = keyof ClientEvents> = ClientEvents[K]
 export type ClientEvents = Events<{

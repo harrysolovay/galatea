@@ -1,4 +1,4 @@
-import type { ContentResource } from "../../common/mod.ts"
+import type { ContentResource } from "../../models/mod.ts"
 
 export type Added = Done
 

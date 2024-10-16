@@ -1,4 +1,4 @@
-import type { Item, ItemResource } from "../../common/mod.ts"
+import type { Item, ItemResource } from "../../../models/mod.ts"
 
 export * as InputAudioTranscription from "./InputAudioTranscription.ts"
 

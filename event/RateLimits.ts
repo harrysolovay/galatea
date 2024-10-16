@@ -1,4 +1,4 @@
-import type { RateLimit } from "../common/mod.ts"
+import type { RateLimit } from "../models/mod.ts"
 
 export type Updated = {
   /** List of rate limit information. */

@@ -1,3 +1,4 @@
+export * as Conversation from "./Conversation/mod.ts"
 export * from "./Error.ts"
 export * as InputAudioBuffer from "./InputAudioBuffer.ts"
 export * as RateLimits from "./RateLimits.ts"

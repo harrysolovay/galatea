@@ -1,4 +1,4 @@
-import type { ItemResource } from "../../common/mod.ts"
+import type { ItemResource } from "../../models/mod.ts"
 
 export type Added = Done
 
