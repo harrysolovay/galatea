@@ -4,7 +4,7 @@ import type { MaxOutputTokens } from "./MaxOutputTokens.ts"
 import type { Modality } from "./Modality.ts"
 import type { ToolChoice } from "./ToolChoice.ts"
 import type { ToolDefinition } from "./ToolDefinition.ts"
-import type { TurnDetection } from "./TurnDetection.ts"
+import { TurnDetection } from "./TurnDetection.ts"
 import type { Voice } from "./Voice.ts"
 
 export type SessionConfig = {
@@ -32,8 +32,8 @@ export type SessionConfig = {
   max_response_output_tokens?: MaxOutputTokens
 }
 
-export function SessionConfig(partial: Partial<SessionConfig>): SessionConfig {
-  return {
+export namespace SessionConfig {
+  export const default_: SessionConfig = {
     modalities: ["audio", "text"],
     instructions: "",
     voice: "alloy",
@@ -43,13 +43,7 @@ export function SessionConfig(partial: Partial<SessionConfig>): SessionConfig {
     temperature: 0.8,
     max_response_output_tokens: "inf",
     tools: [],
-    turn_detection: {
-      type: "server_vad",
-      threshold: 0.5,
-      prefix_padding_ms: 300,
-      silence_duration_ms: 200,
-    },
+    turn_detection: TurnDetection.default_,
     input_audio_transcription: null,
-    ...partial,
   }
 }

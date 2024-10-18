@@ -1,8 +1,10 @@
-import type { Client } from "./Client.ts"
+import type { Session } from "./Client.ts"
 import type { ServerEvents } from "./events/mod.ts"
 
 export const handlers: Handlers = {
   error() {},
+  "session.created"() {},
+  "session.updated"() {},
   "conversation.created"() {},
   "conversation.item.created"() {},
   "conversation.item.deleted"() {},
@@ -28,9 +30,13 @@ export const handlers: Handlers = {
   "response.output_item.done"() {},
   "response.text.delta"() {},
   "response.text.done"() {},
-  "session.created"() {},
-  "session.updated"() {},
 }
 
 export type Handlers = { [K in keyof ServerEvents]: Handler<K> }
-export type Handler<K extends keyof ServerEvents> = (this: Client, args: ServerEvents[K]) => void | Promise<void>
+export type Handler<K extends keyof ServerEvents> = (
+  this: HandlerContext,
+  args: ServerEvents[K],
+) => void | Promise<void>
+export interface HandlerContext {
+  previous_item_id?: string
+}

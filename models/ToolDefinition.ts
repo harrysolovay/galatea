@@ -1,4 +1,4 @@
-import type { JsonSchema } from "../util/mod.ts"
+import type { JsonSchema } from "../util/json_schema.ts"
 
 export type ToolDefinition = ToolDefinition.Function
 export namespace ToolDefinition {

@@ -42,5 +42,5 @@ type ItemBase<K extends string> = {
   /** The unique ID of the item. */
   id: string
   /** The status of the item */
-  status: "in_progress" | "completed" | "incomplete"
+  status: "completed" | "incomplete"
 }

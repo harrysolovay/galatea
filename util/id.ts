@@ -1,4 +1,4 @@
-export function id(prefix: string, length = 21): string {
+export function generateId(prefix: string, length = 21): string {
   const str = Array(length - prefix.length)
     .fill(0)
     .map((_) => CHARS[Math.floor(Math.random() * CHARS.length)])
