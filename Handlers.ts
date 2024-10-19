@@ -1,10 +1,16 @@
-import type { Session } from "./Client.ts"
+import type { Context } from "./Context.ts"
 import type { ServerEvents } from "./events/mod.ts"
 
 export const handlers: Handlers = {
   error() {},
-  "session.created"() {},
-  "session.updated"() {},
+  "session.created"({ session }) {
+    this.sessionResource = session
+  },
+  "session.updated"({ session }) {
+    if (!this.sessionUpdate) throw 0
+    this.sessionUpdate.resolve(session)
+    delete this.sessionUpdate
+  },
   "conversation.created"() {},
   "conversation.item.created"() {},
   "conversation.item.deleted"() {},
@@ -18,7 +24,9 @@ export const handlers: Handlers = {
   "rate_limits.updated"() {},
   "response.audio.delta"() {},
   "response.audio.done"() {},
-  "response.audio_transcript.delta"() {},
+  "response.audio_transcript.delta"({ delta }) {
+    this.textCtls.forEach((ctl) => ctl.enqueue(delta))
+  },
   "response.audio_transcript.done"() {},
   "response.content_part.added"() {},
   "response.content_part.done"() {},
@@ -33,10 +41,4 @@ export const handlers: Handlers = {
 }
 
 export type Handlers = { [K in keyof ServerEvents]: Handler<K> }
-export type Handler<K extends keyof ServerEvents> = (
-  this: HandlerContext,
-  args: ServerEvents[K],
-) => void | Promise<void>
-export interface HandlerContext {
-  previous_item_id?: string
-}
+export type Handler<K extends keyof ServerEvents> = (this: Context, args: ServerEvents[K]) => void | Promise<void>

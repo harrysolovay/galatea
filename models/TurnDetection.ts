@@ -11,11 +11,4 @@ export namespace TurnDetection {
     /** Duration of silence to detect speech stop (in milliseconds). */
     silence_duration_ms: number
   }
-
-  export const default_: TurnDetection = {
-    type: "server_vad",
-    threshold: 0.5,
-    prefix_padding_ms: 300,
-    silence_duration_ms: 200,
-  }
 }
