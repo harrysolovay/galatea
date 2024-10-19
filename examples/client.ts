@@ -10,11 +10,12 @@ const text = session.text()
   }
 })()
 
-await session.update({
+const updated = await session.update({
   instructions: "You're an A-list rapper. You respond in bars.",
   turn_detection: null,
 })
+console.log(updated)
 
-await session.appendText("Tell me about Galatea from the story of Pygmalion.")
+// await session.appendText("Tell me about Galatea from the story of Pygmalion.")
 
-await session.respond()
+// await session.respond()

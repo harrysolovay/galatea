@@ -5,7 +5,7 @@ import type { Modality } from "./Modality.ts"
 import type { Model } from "./Model.ts"
 import type { ToolChoice } from "./ToolChoice.ts"
 import type { ToolDefinition } from "./ToolDefinition.ts"
-import type { TurnDetection } from "./TurnDetection.ts"
+import type { TurnDetectionResource } from "./TurnDetectionResource.ts"
 import type { Voice } from "./Voice.ts"
 
 export type SessionResource = {
@@ -33,7 +33,7 @@ export type SessionResource = {
     })
     | null
   /** Configuration for turn detection. */
-  turn_detection: TurnDetection | null
+  turn_detection: TurnDetectionResource
   /** Tools (functions) available to the model. */
   tools: ToolDefinition[]
   /** How the model chooses tools. */

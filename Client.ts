@@ -28,37 +28,26 @@ export interface Session extends Disposable {
 }
 
 export function Session(connect: () => WebSocket): Session {
-  const context = new Context()
-  const controller = new AbortController()
+  const ctl = new AbortController()
+  const context = new Context(ctl.signal)
 
   const send = listen<ClientEvent, ServerEvent>(
     connect,
     (event) => {
-      context.eventCtls.forEach((ctl) => ctl.enqueue(event))
+      context.eventListeners.forEach((ctl) => ctl.enqueue(event))
       handlers[event.type].call(context, event as never)
     },
-    controller.signal,
+    ctl.signal,
   )
 
   function events(): ReadableStream<ServerEvent> {
-    return stream(context.eventCtls)
+    return context.eventListeners.stream()
   }
   function text(): ReadableStream<string> {
-    return stream(context.textCtls)
+    return context.textListeners.stream()
   }
   function audio(): ReadableStream<Int16Array> {
-    return stream(context.audioCtls)
-  }
-
-  function stream<T>(ctls: Set<ReadableStreamDefaultController<T>>): ReadableStream<T> {
-    let cancelCb = () => {}
-    return new ReadableStream({
-      start: (ctl) => {
-        ctls.add(ctl)
-        cancelCb = () => ctls.delete(ctl)
-      },
-      cancel: () => cancelCb(),
-    })
+    return context.audioListeners.stream()
   }
 
   async function appendText(text: string) {
@@ -120,11 +109,11 @@ export function Session(connect: () => WebSocket): Session {
   }
 
   function dispose() {
-    context.eventCtls.forEach((ctl) => ctl.close())
-    context.textCtls.forEach((ctl) => ctl.close())
-    context.audioCtls.forEach((ctl) => ctl.close())
+    context.eventListeners.forEach((ctl) => ctl.close())
+    context.textListeners.forEach((ctl) => ctl.close())
+    context.audioListeners.forEach((ctl) => ctl.close())
 
-    controller.abort()
+    ctl.abort()
   }
 
   return {

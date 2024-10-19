@@ -1,3 +1,4 @@
+import { decodeBase64 } from "@std/encoding"
 import type { Context } from "./Context.ts"
 import type { ServerEvents } from "./events/mod.ts"
 
@@ -22,10 +23,12 @@ export const handlers: Handlers = {
   "input_audio_buffer.speech_started"() {},
   "input_audio_buffer.speech_stopped"() {},
   "rate_limits.updated"() {},
-  "response.audio.delta"() {},
+  "response.audio.delta"({ delta }) {
+    this.audioListeners.enqueue(() => new Int16Array(decodeBase64(delta).buffer))
+  },
   "response.audio.done"() {},
   "response.audio_transcript.delta"({ delta }) {
-    this.textCtls.forEach((ctl) => ctl.enqueue(delta))
+    this.textListeners.enqueue(() => delta)
   },
   "response.audio_transcript.done"() {},
   "response.content_part.added"() {},
