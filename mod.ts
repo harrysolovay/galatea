@@ -1,5 +1,6 @@
-export * from "./Client.ts"
 export * from "./events/mod.ts"
 export * from "./models/mod.ts"
+export * from "./Session.ts"
+export { SessionHistory } from "./SessionHistory.ts"
 export { conn } from "./socket.ts"
 export { generateId } from "./util/id.ts"

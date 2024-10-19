@@ -8,22 +8,27 @@ import { generateId } from "./util/id.ts"
 import type { JsonSchema, JsonSchemaNative } from "./util/json_schema.ts"
 
 export interface Session extends Disposable {
+  /** Update the session configuration. */
   update(session: SessionConfig): Promise<SessionResource>
-
+  /** Get a readable stream of raw server events. */
   events(): ReadableStream<ServerEvent>
+  /** Get a readable stream of audio transcript tokens. */
   text(): ReadableStream<string>
+  /** Get a readable stream of PCM-encoded audio chunks. */
   audio(): ReadableStream<Int16Array>
-
+  /** Append text to the input buffer. */
   appendText(text: string): Promise<void>
+  /** Add PCM-encoded audio to the input buffer. */
   appendAudio(audio: Int16Array, transcript?: string): Promise<void>
-
-  tool<T extends JsonSchema>(_options: ToolOptions<T>): Promise<void>
-
-  restore(): Promise<void>
-
+  /** Manually trigger response generation (when in VAD). */
   respond(): Promise<ResponseResource>
+  /** Manually cancel a previously-triggered response generation (when in VAD). */
   cancelResponse(): void
-
+  /** Configure function-calling (structured output). */
+  tool<T extends JsonSchema>(_options: ToolOptions<T>): Promise<void>
+  /** TODO: what should this be? */
+  interrupt(): Promise<void>
+  /** Manually end the session and clean up its resources. */
   dispose(): void
 }
 
@@ -92,7 +97,7 @@ export function Session(connect: () => WebSocket): Session {
     unimplemented()
   }
 
-  async function restore() {
+  async function interrupt() {
     unimplemented()
   }
 
@@ -124,7 +129,7 @@ export function Session(connect: () => WebSocket): Session {
     cancelResponse,
     events,
     respond,
-    restore,
+    interrupt,
     text,
     tool,
     dispose,
