@@ -2,7 +2,7 @@ import { unimplemented } from "@std/assert"
 import { Context } from "./Context.ts"
 import type { ClientEvent, ServerEvent } from "./events/mod.ts"
 import { handlers } from "./Handlers.ts"
-import type { Content, SessionConfig, SessionResource } from "./models/mod.ts"
+import type { Content, ResponseResource, SessionConfig, SessionResource } from "./models/mod.ts"
 import { listen } from "./socket.ts"
 import { generateId } from "./util/id.ts"
 import type { JsonSchema, JsonSchemaNative } from "./util/json_schema.ts"
@@ -19,11 +19,10 @@ export interface Session extends Disposable {
 
   tool<T extends JsonSchema>(_options: ToolOptions<T>): Promise<void>
 
-  commit(): Promise<void>
   restore(): Promise<void>
 
-  respond(): Promise<void>
-  cancelResponse(): Promise<void>
+  respond(): Promise<ResponseResource>
+  cancelResponse(): void
 
   dispose(): void
 }
@@ -104,19 +103,21 @@ export function Session(connect: () => WebSocket): Session {
     unimplemented()
   }
 
-  async function commit() {
-    send({ type: "response.create" })
-  }
-
   async function restore() {
     unimplemented()
   }
 
-  async function respond() {
-    unimplemented()
+  function respond(): Promise<ResponseResource> {
+    if (context.responsePending) throw 0
+    const pending = Promise.withResolvers<ResponseResource>()
+    context.responsePending = pending
+    send({ type: "response.create" })
+    return pending.promise
   }
 
-  async function cancelResponse() {}
+  function cancelResponse() {
+    send({ type: "response.cancel" })
+  }
 
   function dispose() {
     context.eventCtls.forEach((ctl) => ctl.close())
@@ -132,7 +133,6 @@ export function Session(connect: () => WebSocket): Session {
     appendText,
     audio,
     cancelResponse,
-    commit,
     events,
     respond,
     restore,

@@ -31,7 +31,11 @@ export const handlers: Handlers = {
   "response.content_part.added"() {},
   "response.content_part.done"() {},
   "response.created"() {},
-  "response.done"() {},
+  "response.done"({ response }) {
+    if (!this.responsePending) throw 0
+    this.responsePending.resolve(response)
+    delete this.responsePending
+  },
   "response.function_call_arguments.delta"() {},
   "response.function_call_arguments.done"() {},
   "response.output_item.added"() {},

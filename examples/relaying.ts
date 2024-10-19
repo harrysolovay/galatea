@@ -11,9 +11,9 @@ if (port) {
     for await (const line of text) console.log(line)
   })()
 
-  await session.ensureTurnDetection(false)
+  await session.update({ turn_detection: null })
   await session.appendText("Tell me about Galatea from the story of Pygmalion.")
-  await session.commit()
+  await session.respond()
 }
 
 const server = Deno.serve((req) => {

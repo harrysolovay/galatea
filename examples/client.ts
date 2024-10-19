@@ -3,13 +3,6 @@ import "@std/dotenv/load"
 
 const session = Session(() => conn(Deno.env.get("OPENAI_API_KEY")!))
 
-// const events = session.events()
-// ;(async () => {
-//   for await (const event of events) {
-//     console.log(event)
-//   }
-// })()
-
 const text = session.text()
 ;(async () => {
   for await (const token of text) {
@@ -22,5 +15,6 @@ await session.update({
   turn_detection: null,
 })
 
-session.appendText("Tell me about Galatea from the story of Pygmalion.")
-session.commit()
+await session.appendText("Tell me about Galatea from the story of Pygmalion.")
+
+await session.respond()
