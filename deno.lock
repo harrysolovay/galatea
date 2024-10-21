@@ -43,8 +43,10 @@
     "npm:@vitejs/plugin-react-swc@^3.7.1": "3.7.1_vite@5.4.8",
     "npm:audio-decode@^2.2.2": "2.2.2",
     "npm:openai@*": "4.67.3",
+    "npm:openai@^4.68.1": "4.68.1_zod@3.23.8",
     "npm:vite@*": "5.4.8",
-    "npm:vite@^5.4.8": "5.4.8"
+    "npm:vite@^5.4.8": "5.4.8",
+    "npm:zod@^3.23.8": "3.23.8"
   },
   "jsr": {
     "@david/code-block-writer@13.0.3": {
@@ -614,6 +616,19 @@
         "node-fetch"
       ]
     },
+    "openai@4.68.1_zod@3.23.8": {
+      "integrity": "sha512-C9XmYRHgra1U1G4GGFNqRHQEjxhoOWbQYR85IibfJ0jpHUhOm4/lARiKaC/h3zThvikwH9Dx/XOKWPNVygIS3g==",
+      "dependencies": [
+        "@types/node@18.19.55",
+        "@types/node-fetch",
+        "abort-controller",
+        "agentkeepalive",
+        "form-data-encoder",
+        "formdata-node",
+        "node-fetch",
+        "zod"
+      ]
+    },
     "opus-decoder@0.7.6": {
       "integrity": "sha512-5QYSl1YQYbSzWL7vM4dJoyrLC804xIvBFjfKTZZ6/z/EgmdFouOTT+8PDM2V18vzgnhRNPDuyB2aTfl/2hvMRA==",
       "dependencies": [
@@ -696,6 +711,9 @@
         "tr46",
         "webidl-conversions"
       ]
+    },
+    "zod@3.23.8": {
+      "integrity": "sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g=="
     }
   },
   "redirects": {
@@ -739,7 +757,9 @@
       "npm:@types/react@^18.3.11",
       "npm:@vitejs/plugin-react-swc@^3.7.1",
       "npm:audio-decode@^2.2.2",
-      "npm:vite@^5.4.8"
+      "npm:openai@^4.68.1",
+      "npm:vite@^5.4.8",
+      "npm:zod@^3.23.8"
     ]
   }
 }

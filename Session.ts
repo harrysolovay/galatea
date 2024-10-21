@@ -1,39 +1,51 @@
+import { unimplemented } from "@std/assert/unimplemented"
 import type { ClientEvent, ServerEvent } from "./events/mod.ts"
+import type { Voice } from "./models/Voice.ts"
 import type { JsonSchema, JsonSchemaNative } from "./util/json_schema.ts"
 
 export declare function Session(connect: () => WebSocket): Session
 
-export interface Segment {
-  events: () => ReadableStream<ServerEvent>
-  eventsInput: () => WritableStream<ClientEvent>
-  audio: () => ReadableStream<Int16Array>
-  audioInput: () => WritableStream<Int16Array>
-  audioInputTranscript: () => ReadableStream<string>
-  transcript: () => ReadableStream<string>
-  textInput: () => WritableStream<string>
-  end: () => void
+export interface Anchor {
+  events(): ReadableStream<ServerEvent>
+  eventsInput(): WritableStream<ClientEvent>
+  audio(): ReadableStream<Int16Array>
+  audioTranscript(): ReadableStream<string>
+  audioInput(): WritableStream<Int16Array>
+  audioInputTranscript(): ReadableStream<string>
+  textInput(): WritableStream<string>
+  end(): void
 }
 
-export interface Session extends Segment {
-  // TODO: errors?
+export interface Session extends Anchor {
+  errors(): ReadableStream<Error>
+  // TODO: is it worth an assert this to prevent second voice set?
   update(sessionUpdateConfig: SessionUpdateConfig): void
-  turn(f: (signal: AbortSignal) => void): Segment
+  turn(f: (signal: AbortSignal) => void): Anchor
 }
 
 export type SessionUpdateConfig = {
+  voice?: Voice
+  audio?: boolean
+  inputTranscript?: boolean
   turnDetection?: boolean
-  tools?: Record<string, Tool>
+  tools?: Record<string, tool>
 }
 
-export type Tool<T extends JsonSchema = JsonSchema> = {
-  desc: string
-  f: (args: JsonSchemaNative<T>) => void
+export type tool<T extends JsonSchema = JsonSchema> = {
+  trigger: string
+  f(args: JsonSchemaNative<T>): void
   schema: T
 }
-export function Tool<T extends JsonSchema>(
-  desc: string,
+export function tool(trigger: string, f: () => void): tool<{ type: "null" }>
+export function tool<T extends JsonSchema>(
+  trigger: string,
   schema: T,
   f: (args: JsonSchemaNative<T>) => void,
-): Tool<T> {
-  return { desc, schema, f }
+): tool<T>
+export function tool<T extends JsonSchema>(
+  trigger: string,
+  schema: T | (() => void),
+  f?: (args: JsonSchemaNative<T>) => void,
+): tool<T> {
+  unimplemented()
 }

@@ -1,4 +1,4 @@
-import { conn, Session, Tool } from "galatea"
+import { conn, Session, tool } from "galatea"
 import "@std/dotenv/load"
 import { delay } from "@std/async"
 
@@ -6,10 +6,15 @@ declare const audioInput: ReadableStream<Int16Array>
 
 const session = Session(() => conn(Deno.env.get("OPENAI_API_KEY")!))
 
+// Log errors if any.
+session.errors().pipeThrough(new TransformStream({ transform: console.error }))
+
+// Set the initial session configuration.
 session.update({
   turnDetection: false,
+  inputTranscript: true,
   tools: {
-    end: Tool("Call when the user is done conversing with you.", { type: "null" }, session.end),
+    end: tool("ends the session", session.end),
   },
 })
 
@@ -20,7 +25,7 @@ delay(10_000).then(turn.end)
 
 // Print tokens of transcript stream to stdout.
 // The stream will close when the response generation is completed.
-for await (const token of turn.transcript()) {
+for await (const token of turn.audioTranscript()) {
   Deno.stdout.write(new TextEncoder().encode(token))
 }
 
@@ -33,7 +38,7 @@ audioInput.pipeTo(session.audioInput())
 // Print tokens of transcript stream to stdout. Non-blocking.
 {
   ;(async () => {
-    for await (const token of session.transcript()) {
+    for await (const token of session.audioTranscript()) {
       Deno.stdout.write(new TextEncoder().encode(token))
     }
   })()
