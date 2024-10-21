@@ -24,8 +24,10 @@ for await (const token of turn.transcript()) {
   Deno.stdout.write(new TextEncoder().encode(token))
 }
 
-// Reenable auto (the default) turn detection.
+// Reenable VAD (the default) turn detection.
 session.update({ turnDetection: true })
+
+// Begin piping audio input into server buffer.
 audioInput.pipeTo(session.audioInput())
 
 // Print tokens of transcript stream to stdout. Non-blocking.

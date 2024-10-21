@@ -15,6 +15,7 @@ export interface Segment {
 }
 
 export interface Session extends Segment {
+  // TODO: errors?
   update(sessionUpdateConfig: SessionUpdateConfig): void
   turn(f: (signal: AbortSignal) => void): Segment
 }
