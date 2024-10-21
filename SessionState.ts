@@ -1,7 +1,7 @@
 import { unimplemented } from "@std/assert/unimplemented"
-import type { Session } from "./Session.ts"
+import type { Session } from "./SessionOld.ts"
 
-export class SessionHistory {
+export class SessionState {
   constructor(readonly session: Session) {}
 
   rehydrate(_session: Session): this {

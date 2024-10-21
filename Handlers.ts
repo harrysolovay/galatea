@@ -24,11 +24,11 @@ export const handlers: Handlers = {
   "input_audio_buffer.speech_stopped"() {},
   "rate_limits.updated"() {},
   "response.audio.delta"({ delta }) {
-    this.audioListeners.enqueue(() => new Int16Array(decodeBase64(delta).buffer))
+    this.audioStreams.enqueue(() => new Int16Array(decodeBase64(delta).buffer))
   },
   "response.audio.done"() {},
   "response.audio_transcript.delta"({ delta }) {
-    this.textListeners.enqueue(() => delta)
+    this.textStreams.enqueue(() => delta)
   },
   "response.audio_transcript.done"() {},
   "response.content_part.added"() {},

@@ -6,9 +6,9 @@ const { port } = parseArgs(Deno.args, { string: ["port"] })
 
 if (port) {
   const session = Session(() => new WebSocket(`ws://localhost:${port}`))
-  const text = session.text()
+  const text = session.transcript()
   ;(async () => {
-    for await (const line of text) console.log(line)
+    for await (const token of text) console.log(token)
   })()
 
   await session.update({ turn_detection: null })

@@ -2,22 +2,25 @@ import type { ServerEvent } from "./events/mod.ts"
 import type { ResponseResource, SessionResource } from "./models/mod.ts"
 
 export class Context {
-  eventListeners
-  textListeners
-  audioListeners
+  pending = new Set<PromiseWithResolvers<unknown>>() // TODO
+
+  eventStreams
+  textStreams
+  audioStreams
   constructor(readonly signal: AbortSignal) {
-    this.eventListeners = new Listeners<ServerEvent>(signal)
-    this.textListeners = new Listeners<string>(signal)
-    this.audioListeners = new Listeners<Int16Array>(signal)
+    this.eventStreams = new Streams<ServerEvent>(signal)
+    this.textStreams = new Streams<string>(signal)
+    this.audioStreams = new Streams<Int16Array>(signal)
   }
 
   declare sessionResource?: SessionResource
   declare previous_item_id?: string
+
   declare sessionUpdate?: PromiseWithResolvers<SessionResource>
   declare responsePending?: PromiseWithResolvers<ResponseResource>
 }
 
-export class Listeners<T> extends Set<ReadableStreamDefaultController<T>> {
+export class Streams<T> extends Set<ReadableStreamDefaultController<T>> {
   constructor(private signal: AbortSignal) {
     super()
   }
