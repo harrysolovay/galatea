@@ -1,4 +1,4 @@
-import { conn, Session } from "galatea"
+import { conn, Session, Tool } from "galatea"
 import "@std/dotenv/load"
 import { delay } from "@std/async"
 
@@ -6,13 +6,14 @@ declare const audioInput: ReadableStream<Int16Array>
 
 const session = Session(() => conn(Deno.env.get("OPENAI_API_KEY")!))
 
-// Can pass misc. configuration into `manualTurn` as to avoid the second `session.update`...
-const startTurn = session.manual({
-  // ... for instance, tools.
-  tools: session.tools((_) => _.add("end", "Call this when the user no longer requires replies.", session.end)),
+session.update({
+  turnDetection: false,
+  tools: {
+    end: Tool("Call when the user is done conversing with you.", { type: "null" }, session.end),
+  },
 })
 
-const turn = startTurn((signal) => audioInput.pipeTo(session.audioInput(), { signal }))
+const turn = session.turn((signal) => audioInput.pipeTo(session.audioInput(), { signal }))
 
 // Wait 10 seconds (to allow input audio to be collected), then end the turn.
 delay(10_000).then(turn.end)
@@ -24,7 +25,7 @@ for await (const token of turn.transcript()) {
 }
 
 // Reenable auto (the default) turn detection.
-session.vad()
+session.update({ turnDetection: true })
 audioInput.pipeTo(session.audioInput())
 
 // Print tokens of transcript stream to stdout. Non-blocking.
