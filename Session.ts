@@ -3,9 +3,9 @@ import type { SessionConfig } from "./mod.ts"
 import type { ToolDefinition } from "./models/mod.ts"
 import type { JsonSchema, JsonSchemaNative } from "./util/json_schema.ts"
 
-export declare function Session(connect: () => WebSocket, signal: AbortSignal): Session
+export declare function Session(connect: () => WebSocket): Session
 
-export interface SessionChannel {
+export interface Channel {
   events(): ReadableStream<ServerEvent>
   eventsInput(): WritableStream<ClientEvent>
   audio(): ReadableStream<Int16Array>
@@ -13,20 +13,13 @@ export interface SessionChannel {
   audioInputTranscript(): ReadableStream<string>
   transcript(): ReadableStream<string>
   textInput(): WritableStream<string>
-}
-
-export interface Session extends SessionChannel {
-  manual(config?: TurnModeSessionConfig): StartTurn
-  auto(config?: TurnModeSessionConfig): void
-  tools(build: (builder: ToolsUpdateBuilder) => ToolsUpdateBuilder): ToolDefinition[]
-}
-
-export type TurnModeSessionConfig = Partial<Omit<SessionConfig, "turn_detection">>
-
-export type StartTurn = () => Turn
-
-export interface Turn extends SessionChannel {
   end(): void
+}
+
+export interface Session extends Channel {
+  manual(config?: Partial<Omit<SessionConfig, "turn_detection">>): (start: (signal: AbortSignal) => void) => Channel
+  vad(config?: Partial<Omit<SessionConfig, "turn_detection">>): void
+  tools(build?: (builder: ToolsUpdateBuilder) => ToolsUpdateBuilder): ToolDefinition[]
 }
 
 export type ToolsUpdateBuilder = {
