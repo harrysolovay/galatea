@@ -1,3 +1,6 @@
+// NOTES:
+// - are streams lazy / do they need to be explicitly piped / will the error piping into the transform work?
+
 import { conn, Session, tool } from "galatea"
 import "@std/dotenv/load"
 import { delay } from "@std/async"
@@ -21,11 +24,11 @@ session.update({
 const turn = session.turn((signal) => audioInput.pipeTo(session.audioInput(), { signal }))
 
 // Wait 10 seconds (to allow input audio to be collected), then end the turn.
-delay(10_000).then(turn.end)
+delay(10_000).then(() => turn.end())
 
 // Print tokens of transcript stream to stdout.
 // The stream will close when the response generation is completed.
-for await (const token of turn.audioTranscript()) {
+for await (const token of turn.transcript()) {
   Deno.stdout.write(new TextEncoder().encode(token))
 }
 
@@ -38,7 +41,7 @@ audioInput.pipeTo(session.audioInput())
 // Print tokens of transcript stream to stdout. Non-blocking.
 {
   ;(async () => {
-    for await (const token of session.audioTranscript()) {
+    for await (const token of session.transcript()) {
       Deno.stdout.write(new TextEncoder().encode(token))
     }
   })()

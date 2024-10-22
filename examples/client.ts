@@ -3,7 +3,7 @@ import "@std/dotenv/load"
 
 const session = Session(() => conn(Deno.env.get("OPENAI_API_KEY")!))
 
-const text = session.audioTranscript()
+const text = session.transcript()
 ;(async () => {
   for await (const token of text) {
     Deno.stdout.write(new TextEncoder().encode(token))

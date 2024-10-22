@@ -6,7 +6,7 @@ const { port } = parseArgs(Deno.args, { string: ["port"] })
 
 if (port) {
   const session = Session(() => new WebSocket(`ws://localhost:${port}`))
-  const text = session.audioTranscript()
+  const text = session.transcript()
   ;(async () => {
     for await (const token of text) console.log(token)
   })()
