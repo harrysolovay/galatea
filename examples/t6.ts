@@ -1,7 +1,7 @@
 import { conn, Session, T, Tool } from "galatea"
 import "@std/dotenv/load"
 
-declare function audioInput(): ReadableStream<Int16Array>
+declare function audioInput(signal: AbortSignal): ReadableStream<Int16Array>
 
 const session = Session(() => conn(Deno.env.get("OPENAI_API_KEY")!), {
   inputTranscript: true,
@@ -11,7 +11,7 @@ const session = Session(() => conn(Deno.env.get("OPENAI_API_KEY")!), {
 })
 
 let ctl: AbortController | null = new AbortController()
-audioInput().pipeTo(session.audioInput(ctl.signal))
+audioInput(ctl.signal).pipeTo(session.audioInput())
 
 {
   ;(async () => {
@@ -32,6 +32,6 @@ function toggleAudioInput() {
     ctl = null
   } else {
     ctl = new AbortController()
-    audioInput().pipeTo(session.audioInput(ctl.signal))
+    audioInput(ctl.signal).pipeTo(session.audioInput())
   }
 }

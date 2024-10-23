@@ -9,15 +9,18 @@ const { port } = parseArgs(Deno.args, { string: ["port"] })
 if (port) {
   const session = Session(() => new WebSocket(`ws://localhost:${port}`))
   const ctl = new AbortController()
-  audioInput().pipeTo(session.audioInput(ctl.signal))
+  audioInput(ctl.signal).pipeTo(session.audioInput())
   ;(async () => {
     for await (const token of session.transcript()) {
       Deno.stdout.write(new TextEncoder().encode(token))
     }
   })()
-  await delay(10_000).then(() => ctl.abort())
+  await delay(10_000).then(() => {
+    ctl.abort()
+    session.end()
+  })
 
-  function audioInput(): ReadableStream<Int16Array> {
+  function audioInput(_signal: AbortSignal): ReadableStream<Int16Array> {
     unimplemented()
   }
 }

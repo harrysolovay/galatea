@@ -1,13 +1,13 @@
 import type { Voice } from "./models/Voice.ts"
 import type { RootTy } from "./schema/mod.ts"
 
-export declare function Session(connect: () => WebSocket, config?: SessionConfig2): Session
+export declare function Session(connect: () => WebSocket, options?: SessionConfig): Session
 
 export interface Session {
   /** Get a writable stream with which to append text to the input buffer. */
   appendText(text: string): void
   /** Get a writable stream with which to append audio to the input buffer. */
-  audioInput(signal: AbortSignal): WritableStream<Int16Array>
+  audioInput(): WritableStream<Int16Array>
   /** Get a readable stream of PCM-encoded audio chunks. */
   audio(): ReadableStream<Int16Array>
   /** Get a readable stream of audio transcript tokens. */
@@ -26,7 +26,7 @@ export interface Session {
   toggleTurnDetection(): void
 }
 
-export interface SessionConfig2 extends SessionUpdateConfig {
+export interface SessionConfig extends SessionUpdateConfig {
   /** The name of the desired voice. */
   voice?: Voice
 }
