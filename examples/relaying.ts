@@ -1,19 +1,25 @@
-import { conn, Session } from "../mod.ts"
+import { delay } from "@std/async"
+import { conn, Session } from "galatea"
 import "@std/dotenv/load"
+import { unimplemented } from "@std/assert"
 import { parseArgs } from "@std/cli"
 
 const { port } = parseArgs(Deno.args, { string: ["port"] })
 
 if (port) {
   const session = Session(() => new WebSocket(`ws://localhost:${port}`))
-  const text = session.transcript()
+  const ctl = new AbortController()
+  audioInput().pipeTo(session.audioInput(ctl.signal))
   ;(async () => {
-    for await (const token of text) console.log(token)
+    for await (const token of session.transcript()) {
+      Deno.stdout.write(new TextEncoder().encode(token))
+    }
   })()
+  await delay(10_000).then(() => ctl.abort())
 
-  await session.update({ turn_detection: null })
-  await session.appendText("Tell me about Galatea from the story of Pygmalion.")
-  await session.respond()
+  function audioInput(): ReadableStream<Int16Array> {
+    unimplemented()
+  }
 }
 
 const server = Deno.serve((req) => {
