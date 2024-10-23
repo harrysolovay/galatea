@@ -21,6 +21,7 @@
     "@std/http": "jsr:@std/http@1",
     "@std/path": "jsr:@std/path@^1.0.6",
     "@std/streams": "jsr:@std/streams@^1.0.7",
+    "@std/testing": "jsr:@std/testing@^1.0.3",
     "@std/text": "jsr:@std/text@^1.0.7",
     "@types/json-schema": "npm:@types/json-schema@^7.0.15",
     "@types/react": "npm:@types/react@^18.3.11",
@@ -32,8 +33,7 @@
     "react-dom": "https://esm.sh/react-dom@18.2.0",
     "react-dom/": "https://esm.sh/react-dom@18.2.0/",
     "react/": "https://esm.sh/react@18.3.1/",
-    "vite": "npm:vite@^5.4.8",
-    "zod": "npm:zod@^3.23.8"
+    "vite": "npm:vite@^5.4.8"
   },
   "scopes": {
     "./examples/": {

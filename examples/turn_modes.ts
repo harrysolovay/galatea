@@ -21,14 +21,14 @@ session.update({
   },
 })
 
-const turn = session.turn((signal) => audioInput.pipeTo(session.audioInput(), { signal }))
+const turn = session.startSegment((signal) => audioInput.pipeTo(session.audioInput(), { signal }))
 
 // Wait 10 seconds (to allow input audio to be collected), then end the turn.
 delay(10_000).then(() => turn.end())
 
 // Print tokens of transcript stream to stdout.
 // The stream will close when the response generation is completed.
-for await (const token of turn.transcript()) {
+for await (const token of turn.inputTranscript()) {
   Deno.stdout.write(new TextEncoder().encode(token))
 }
 

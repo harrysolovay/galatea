@@ -1,5 +1,6 @@
 export * from "./events/mod.ts"
 export * from "./models/mod.ts"
+export * as T from "./schema/mod.ts"
 export * from "./Session.ts"
 export { SessionState } from "./SessionState.ts"
 export { conn } from "./socket.ts"

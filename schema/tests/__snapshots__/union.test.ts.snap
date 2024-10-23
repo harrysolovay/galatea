@@ -1,0 +1,130 @@
+export const snapshot = {};
+
+snapshot[`No Variant Values 1`] = `
+{
+  "\$defs": {
+    Inner: {
+      oneOf: [
+        {
+          additionalProperties: false,
+          properties: {
+            type: {
+              const: "A",
+            },
+          },
+          required: [
+            "type",
+          ],
+        },
+        {
+          additionalProperties: false,
+          properties: {
+            type: {
+              const: "B",
+            },
+          },
+          required: [
+            "type",
+          ],
+        },
+      ],
+    },
+    Root: {
+      additionalProperties: false,
+      properties: {
+        inner: {
+          "\$ref": "#/\$defs/Inner",
+        },
+      },
+      required: [
+        "inner",
+      ],
+      type: "object",
+    },
+  },
+  additionalProperties: false,
+  properties: {
+    inner: {
+      "\$ref": "#/\$defs/Inner",
+    },
+  },
+  required: [
+    "inner",
+  ],
+  type: "object",
+}
+`;
+
+snapshot[`Variant Values 1`] = `
+{
+  "\$defs": {
+    Inner: {
+      oneOf: [
+        {
+          additionalProperties: false,
+          properties: {
+            type: {
+              const: "A",
+            },
+            value: {
+              type: "string",
+            },
+          },
+          required: [
+            "type",
+            "value",
+          ],
+        },
+        {
+          additionalProperties: false,
+          properties: {
+            type: {
+              const: "B",
+            },
+            value: {
+              type: "number",
+            },
+          },
+          required: [
+            "type",
+            "value",
+          ],
+        },
+        {
+          additionalProperties: false,
+          properties: {
+            type: {
+              const: "C",
+            },
+          },
+          required: [
+            "type",
+          ],
+        },
+      ],
+    },
+    Root: {
+      additionalProperties: false,
+      properties: {
+        inner: {
+          "\$ref": "#/\$defs/Inner",
+        },
+      },
+      required: [
+        "inner",
+      ],
+      type: "object",
+    },
+  },
+  additionalProperties: false,
+  properties: {
+    inner: {
+      "\$ref": "#/\$defs/Inner",
+    },
+  },
+  required: [
+    "inner",
+  ],
+  type: "object",
+}
+`;
