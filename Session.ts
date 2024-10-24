@@ -20,6 +20,8 @@ export interface Session {
   commit(): void
   /** Trigger a response (if turn detection enabled). */
   respond(): void
+  /** Cancel a previously-triggered response generation. */
+  cancelResponse(): void
   /** Update the session configuration. */
   update(sessionUpdateConfig: SessionUpdateConfig): void
   /** Get a readable stream with which to observe errors. */
@@ -54,6 +56,7 @@ export function Session(connect: () => WebSocket, config?: SessionConfig): Sessi
     transcript,
     commit,
     respond,
+    cancelResponse,
     update,
     errors,
     end,
@@ -121,6 +124,10 @@ export function Session(connect: () => WebSocket, config?: SessionConfig): Sessi
 
   function respond() {
     send({ type: "response.create" })
+  }
+
+  function cancelResponse() {
+    send({ type: "response.cancel" })
   }
 
   function update(config: SessionUpdateConfig) {
