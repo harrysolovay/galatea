@@ -12,9 +12,11 @@ export interface SessionUpdateConfig {
   /** Whether to receive input transcript events. */
   inputTranscript?: boolean
   /** Whether to enable turn detection. */
-  turnDetection?: false | Omit<TurnDetection, "type">
+  turnDetection?: boolean | Omit<TurnDetection, "type">
   /** Tools to make accessible to the model. */
   tools?: Record<string, Tool>
+  /** Instructions for the system agent. */
+  instructions?: string
 }
 
 export function Tool<T extends RootTy>(
@@ -39,7 +41,12 @@ export function formatSessionConfigUpdate(config: SessionConfig): SessionConfig_
     modalities: ["text", ...config.mute ? [] : ["audio"] satisfies Modality[]],
     input_audio_transcription: config.inputTranscript ? { model: "whisper-1" } : null,
     ...typeof config.turnDetection === "undefined" ? {} : config.turnDetection
-      ? { turn_detection: { type: "server_vad", ...config.turnDetection } }
+      ? {
+        turn_detection: {
+          type: "server_vad",
+          ...typeof config.turnDetection === "boolean" ? {} : config.turnDetection,
+        },
+      }
       : { turn_detection: null },
     ...config.tools
       ? {
@@ -52,5 +59,6 @@ export function formatSessionConfigUpdate(config: SessionConfig): SessionConfig_
       }
       : {},
     ...config.voice ? { voice: config.voice } : {},
+    ...config.instructions ? { instructions: config.instructions } : {},
   }
 }

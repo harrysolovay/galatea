@@ -4,7 +4,7 @@ import type { ServerEvents } from "./events/mod.ts"
 
 export const handlers: Handlers = {
   error({ error }) {
-    this.errorStreams.enqueue(() => error)
+    this.errorListeners.enqueue(() => error)
   },
   "session.created"({ session }) {
     this.sessionResource = session
@@ -25,11 +25,11 @@ export const handlers: Handlers = {
   "rate_limits.updated"() {},
   "response.audio.delta"({ delta }) {
     const { buffer } = decodeBase64(delta)
-    this.audioStreams.enqueue(() => new Int16Array(buffer))
+    this.audioListeners.enqueue(() => new Int16Array(buffer))
   },
   "response.audio.done"() {},
   "response.audio_transcript.delta"({ delta }) {
-    this.transcriptStream.enqueue(() => delta)
+    this.transcriptListeners.enqueue(() => delta)
   },
   "response.audio_transcript.done"() {},
   "response.content_part.added"() {},

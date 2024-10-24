@@ -7,6 +7,8 @@ import { listen } from "./socket.ts"
 import { base64Encode } from "./util/arrayBufferToBase64.ts"
 import { generateId } from "./util/id.ts"
 
+// TODO: idle?
+
 export interface Session {
   /** Get a writable stream with which to append text to the input buffer. */
   appendText(text: string): void
@@ -18,6 +20,8 @@ export interface Session {
   transcript(includeInput?: boolean): ReadableStream<string>
   /** Commit the current buffer and trigger a response (if turn detection enabled). */
   commit(): void
+  /** Trigger a response (if turn detection enabled). */
+  respond(): void
   /** Update the session configuration. */
   update(sessionUpdateConfig: SessionUpdateConfig): void
   /** Get a readable stream with which to observe errors. */
@@ -51,6 +55,7 @@ export function Session(connect: () => WebSocket, config?: SessionConfig): Sessi
     audio,
     transcript,
     commit,
+    respond,
     update,
     errors,
     end,
@@ -93,9 +98,10 @@ export function Session(connect: () => WebSocket, config?: SessionConfig): Sessi
   }
 
   function audio() {
-    return context.audioStreams.stream()
+    return context.audioListeners.stream()
   }
 
+  // TODO: automatically send disable transcript when no longer in use
   function transcript(includeInput?: boolean) {
     if (includeInput && (!(context.sessionResource && context.sessionResource.input_audio_transcription))) {
       send({
@@ -107,11 +113,16 @@ export function Session(connect: () => WebSocket, config?: SessionConfig): Sessi
         },
       })
     }
-    return context.transcriptStream.stream()
+    return context.transcriptListeners.stream()
   }
 
   function commit() {
     send({ type: "input_audio_buffer.commit" })
+    respond()
+  }
+
+  function respond() {
+    send({ type: "response.create" })
   }
 
   function update(config: SessionUpdateConfig) {
@@ -122,7 +133,7 @@ export function Session(connect: () => WebSocket, config?: SessionConfig): Sessi
   }
 
   function errors() {
-    return context.errorStreams.stream()
+    return context.errorListeners.stream()
   }
 
   function end() {

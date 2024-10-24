@@ -1,8 +1,6 @@
 import { conn, Session, T, Tool } from "galatea"
 import "@std/dotenv/load"
 
-declare function audioInput(signal: AbortSignal): ReadableStream<Int16Array>
-
 const session = Session(() => conn(Deno.env.get("OPENAI_API_KEY")!), {
   inputTranscript: true,
   tools: {
@@ -35,3 +33,5 @@ function toggleAudioInput() {
     audioInput(ctl.signal).pipeTo(session.audioInput())
   }
 }
+
+declare function audioInput(signal: AbortSignal): ReadableStream<Int16Array>
