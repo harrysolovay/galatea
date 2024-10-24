@@ -1,13 +1,11 @@
 import { Context } from "./Context.ts"
 import type { ClientEvent, ServerEvent } from "./events/mod.ts"
 import { handlers } from "./handlers.ts"
+import { listen } from "./listen.ts"
 import type { Content, ErrorDetails } from "./models/mod.ts"
 import { formatSessionConfigUpdate, type SessionConfig, type SessionUpdateConfig } from "./SessionConfig.ts"
-import { listen } from "./socket.ts"
 import { base64Encode } from "./util/arrayBufferToBase64.ts"
 import { generateId } from "./util/id.ts"
-
-// TODO: idle?
 
 export interface Session {
   /** Get a writable stream with which to append text to the input buffer. */
