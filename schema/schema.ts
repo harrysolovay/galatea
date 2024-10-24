@@ -1,5 +1,5 @@
 import { Context, type Ty } from "./_base.ts"
-import type { UnionTy } from "./union.ts"
+import type { ValidRootKey } from "./common.ts"
 
 export function schema<M extends Record<string, Ty>>(models: M, rootKey: ValidRootKey<M>): Record<string, unknown> {
   const root = models[rootKey]!
@@ -7,8 +7,4 @@ export function schema<M extends Record<string, Ty>>(models: M, rootKey: ValidRo
   return Object.assign(root.schema(ctx), {
     $defs: Object.fromEntries(Object.entries(models).map(([k, v]) => [k, v.schema(ctx)])),
   })
-}
-
-type ValidRootKey<M extends Record<string, Ty>> = keyof {
-  [K in keyof M as (M[K] extends UnionTy<any> ? never : K)]: never
 }

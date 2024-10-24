@@ -44,13 +44,16 @@ while (documents.length) {
 }
 
 class Suggestion extends T.object({
-  file: T.string,
-  startLine: T.number,
-  endLine: T.number,
-  suggestion: T.string,
-}) {}
+  file: T.string.with({ description: "The file containing the span to be potentially replaced." }),
+  startLine: T.number.with({ description: "The line on which the potentially-to-be-replaced span starts." }),
+  endLine: T.number.with({ description: "The line on which the potentially-to-be-replaced span ends." }),
+  replacement: T.string.with({ description: "The replacement suggestion lines." }),
+  why: T.string.with({ description: "The reason for suggesting the replacement" }),
+})
+  .with({ description: "A container for information related to a replacement suggestion." })
+{}
 class Root extends T.object({
-  suggestions: T.array(Suggestion),
+  suggestions: T.array(Suggestion).with({ description: "A list of replacement suggestions." }),
 }) {}
 
 const openai = new Openai({ apiKey: Deno.env.get("OPENAI_API_KEY") })
@@ -60,15 +63,12 @@ const { usage, choices } = await openai.chat.completions.create({
     role: "user",
     content: instructions,
   }],
-  response_format: {
-    type: "json_schema",
-    json_schema: {
-      name: "suggest_diffs",
-      description: "",
-      schema: T.schema({ Suggestion, Root }, "Root"),
-      strict: true,
-    },
-  },
+  response_format: T.responseFormat(
+    "suggest_replacements",
+    "offer replacement suggestions for specific spans of the provided files.",
+    { Suggestion, Root },
+    "Root",
+  ),
 })
 
 const transcriptPath = path.resolve(Deno.cwd(), transcript)

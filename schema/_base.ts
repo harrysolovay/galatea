@@ -1,16 +1,27 @@
-export interface Ty<N = any> {
-  schema(ctx: Context): object
+export interface TyConfig {
+  description?: string
+}
+
+export interface Ty<N = any, C extends TyConfig = any> {
+  config: Partial<C>
   new(): N
+  schema(ctx: Context): object
+  with(config: Partial<C>): this
 }
 
 export abstract class TyBase {}
 
-export namespace Ty {
-  export function make<Ty_ extends Ty>(schema: (ctx: Context) => unknown) {
-    return class Ty extends TyBase {
-      static schema = schema
-    } as Ty_
-  }
+export function make<Ty_ extends Ty>(
+  config: Partial<Ty["config"]>,
+  schema: (this: Ty_, ctx: Context) => unknown,
+) {
+  return class Ty extends TyBase {
+    static config = config
+    static schema = schema
+    static with(config: Partial<Ty_["config"]>): Ty_ {
+      return make(Object.assign({}, this.config, config), schema)
+    }
+  } as Ty_
 }
 
 export class Context {

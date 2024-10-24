@@ -1,7 +1,10 @@
-import { Ty } from "./_base.ts"
+import { make, type Ty, type TyConfig } from "./_base.ts"
 
-export const string = Ty.make<StringTy>(() => ({
-  type: "string",
-}))
+export const string = make<StringTy>({}, function() {
+  return {
+    type: "string",
+    description: this.config.description,
+  }
+})
 
-export type StringTy = Ty<string>
+export type StringTy = Ty<string, TyConfig>
