@@ -1,7 +1,7 @@
 import { Context, type Ty } from "./_base.ts"
 import type { UnionTy } from "./union.ts"
 
-export function schema<M extends Record<string, Ty>>(models: M, rootKey: ValidRootKey<M>): unknown {
+export function schema<M extends Record<string, Ty>>(models: M, rootKey: ValidRootKey<M>): Record<string, unknown> {
   const root = models[rootKey]!
   const ctx = new Context(root, models)
   return Object.assign(root.schema(ctx), {
