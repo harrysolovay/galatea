@@ -22,7 +22,7 @@ audioInput(ctl.signal).pipeTo(session.audioInput())
 }
 
 function _toggleTurnDetection() {
-  session.toggleTurnDetection()
+  session.update({ turnDetection: false })
   if (session.turnDetection() !== !!ctl) toggleAudioInput()
 }
 

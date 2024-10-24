@@ -28,7 +28,7 @@ export const handlers: Handlers = {
   },
   "response.audio.done"() {},
   "response.audio_transcript.delta"({ delta }) {
-    this.textStreams.enqueue(() => delta)
+    this.transcriptStream.enqueue(() => delta)
   },
   "response.audio_transcript.done"() {},
   "response.content_part.added"() {},

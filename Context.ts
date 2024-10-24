@@ -1,15 +1,12 @@
-import type { ServerEvent } from "./events/mod.ts"
 import type { ResponseResource, SessionResource } from "./models/mod.ts"
 
 export class Context {
   pending = new Set<PromiseWithResolvers<unknown>>() // TODO
 
-  eventStreams
-  textStreams
+  transcriptStream
   audioStreams
   constructor(readonly signal: AbortSignal) {
-    this.eventStreams = new Streams<ServerEvent>(signal)
-    this.textStreams = new Streams<string>(signal)
+    this.transcriptStream = new Streams<string>(signal)
     this.audioStreams = new Streams<Int16Array>(signal)
   }
 
