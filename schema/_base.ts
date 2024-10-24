@@ -1,5 +1,4 @@
-export interface Ty<K extends string = string, N = any> {
-  type: K
+export interface Ty<N = any> {
   schema(ctx: Context): object
   new(): N
 }
@@ -7,9 +6,8 @@ export interface Ty<K extends string = string, N = any> {
 export abstract class TyBase {}
 
 export namespace Ty {
-  export function make<Ty_ extends Ty>(type: Ty_["type"], schema: (ctx: Context) => unknown) {
+  export function make<Ty_ extends Ty>(schema: (ctx: Context) => unknown) {
     return class Ty extends TyBase {
-      static readonly type = type
       static schema = schema
     } as Ty_
   }

@@ -3,14 +3,14 @@ import type { Context } from "./Context.ts"
 import type { ServerEvents } from "./events/mod.ts"
 
 export const handlers: Handlers = {
-  error() {},
+  error({ error }) {
+    this.errorStreams.enqueue(() => error)
+  },
   "session.created"({ session }) {
     this.sessionResource = session
   },
   "session.updated"({ session }) {
-    if (!this.sessionUpdate) throw 0
-    this.sessionUpdate.resolve(session)
-    delete this.sessionUpdate
+    this.sessionResource = session
   },
   "conversation.created"() {},
   "conversation.item.created"() {},
@@ -24,7 +24,8 @@ export const handlers: Handlers = {
   "input_audio_buffer.speech_stopped"() {},
   "rate_limits.updated"() {},
   "response.audio.delta"({ delta }) {
-    this.audioStreams.enqueue(() => new Int16Array(decodeBase64(delta).buffer))
+    const { buffer } = decodeBase64(delta)
+    this.audioStreams.enqueue(() => new Int16Array(buffer))
   },
   "response.audio.done"() {},
   "response.audio_transcript.delta"({ delta }) {
@@ -34,11 +35,7 @@ export const handlers: Handlers = {
   "response.content_part.added"() {},
   "response.content_part.done"() {},
   "response.created"() {},
-  "response.done"({ response }) {
-    if (!this.responsePending) throw 0
-    this.responsePending.resolve(response)
-    delete this.responsePending
-  },
+  "response.done"() {},
   "response.function_call_arguments.delta"() {},
   "response.function_call_arguments.done"() {},
   "response.output_item.added"() {},

@@ -1,20 +1,19 @@
-import type { ResponseResource, SessionResource } from "./models/mod.ts"
+import type { ErrorDetails, SessionResource } from "./models/mod.ts"
 
 export class Context {
   pending = new Set<PromiseWithResolvers<unknown>>() // TODO
 
   transcriptStream
   audioStreams
+  errorStreams
   constructor(readonly signal: AbortSignal) {
     this.transcriptStream = new Streams<string>(signal)
     this.audioStreams = new Streams<Int16Array>(signal)
+    this.errorStreams = new Streams<ErrorDetails>(signal)
   }
 
   declare sessionResource?: SessionResource
   declare previous_item_id?: string
-
-  declare sessionUpdate?: PromiseWithResolvers<SessionResource>
-  declare responsePending?: PromiseWithResolvers<ResponseResource>
 }
 
 export class Streams<T> extends Set<ReadableStreamDefaultController<T>> {

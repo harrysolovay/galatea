@@ -1,7 +1,7 @@
 import { Context } from "./Context.ts"
 import type { ClientEvent, ServerEvent } from "./events/mod.ts"
 import { handlers } from "./handlers.ts"
-import type { Content, SessionConfig as SessionConfig_, TurnDetection } from "./models/mod.ts"
+import type { Content, ErrorDetails, SessionConfig as SessionConfig_, TurnDetection } from "./models/mod.ts"
 import type { Modality } from "./models/Modality.ts"
 import type { Voice } from "./models/Voice.ts"
 import { type RootTy, schema } from "./schema/mod.ts"
@@ -36,6 +36,7 @@ export function Session(connect: () => WebSocket, options?: SessionConfig): Sess
     transcript,
     commit,
     update,
+    errors,
     end,
     turnDetection,
   }
@@ -104,6 +105,10 @@ export function Session(connect: () => WebSocket, options?: SessionConfig): Sess
     })
   }
 
+  function errors() {
+    return context.errorStreams.stream()
+  }
+
   function end() {
     ctl.abort()
   }
@@ -126,10 +131,10 @@ export interface Session {
   commit(): void
   /** Update the session configuration. */
   update(sessionUpdateConfig: SessionUpdateConfig): void
+  /** Get a readable stream with which to observe errors. */
+  errors(): ReadableStream<ErrorDetails>
   /** End the session. */
   end(): void
-  /** Get a readable stream with which to observe errors. */
-  // errors(): ReadableStream<Error>
   /** See whether turn detection enabled. */
   turnDetection(): boolean
 }

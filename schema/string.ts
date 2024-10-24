@@ -1,7 +1,7 @@
 import { Ty } from "./_base.ts"
 
-export const string = Ty.make<StringTy>("string", () => ({
+export const string = Ty.make<StringTy>(() => ({
   type: "string",
 }))
 
-export type StringTy = Ty<"string", string>
+export type StringTy = Ty<string>

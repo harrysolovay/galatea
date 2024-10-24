@@ -1,7 +1,7 @@
 import { Ty } from "./_base.ts"
 
 export function object<F extends ObjectTyFields>(fields: F): ObjectTy<F> {
-  return Ty.make("object", (ctx) => {
+  return Ty.make((ctx) => {
     return ({
       type: "object",
       properties: Object.fromEntries(
@@ -15,4 +15,4 @@ export function object<F extends ObjectTyFields>(fields: F): ObjectTy<F> {
 
 export type ObjectTyFields = Record<string, Ty>
 
-export type ObjectTy<F extends ObjectTyFields = any> = Ty<"object", { [K in keyof F]: InstanceType<F[K]> }>
+export type ObjectTy<F extends ObjectTyFields = any> = Ty<{ [K in keyof F]: InstanceType<F[K]> }>

@@ -5,6 +5,8 @@
   "exclude": ["target"],
   "tasks": {
     "mod": "deno run -A https://deno.land/x/moderate@0.0.5/mod.ts && dprint fmt",
+    "test": "deno test -A",
+    "test:update": "deno task test -- --update",
     "www": "deno run -A npm:vite",
     "www:build": "deno run -A npm:vite build --emptyOutDir"
   },
