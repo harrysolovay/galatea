@@ -4,7 +4,7 @@ import "@std/dotenv/load"
 const session = Session(() => conn(Deno.env.get("OPENAI_API_KEY")!), {
   inputTranscript: true,
   tools: {
-    end: Tool("ends the session", T.none, () => session.end()),
+    end: Tool("ends the session", () => session.end()),
   },
 })
 

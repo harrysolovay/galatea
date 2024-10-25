@@ -1,5 +1,5 @@
+import * as T from "structured-outputs"
 import type { Modality, SessionConfig as SessionConfig_, TurnDetection, Voice } from "./models/mod.ts"
-import { type RootTy, schema } from "./schema/mod.ts"
 
 export interface SessionConfig extends SessionUpdateConfig {
   /** The name of the desired voice. */
@@ -19,21 +19,34 @@ export interface SessionUpdateConfig {
   instructions?: string
 }
 
-export function Tool<T extends RootTy>(
+export function Tool(
+  description: string,
+  f: () => unknown,
+): Tool
+export function Tool<T extends T.ObjectTy>(
   description: string,
   type: T,
   f: (instance: InstanceType<T>) => unknown,
-): Tool<T> {
-  return { description, type, f }
+): Tool
+export function Tool<T extends T.ObjectTy>(
+  description: string,
+  type: T | (() => unknown),
+  f?: (instance: InstanceType<T>) => unknown,
+): Tool {
+  return {
+    description,
+    type: typeof type === "function" ? undefined : type,
+    f: (typeof type === "function" ? type : f) as never,
+  }
 }
 
-export interface Tool<T extends RootTy = any> {
+export interface Tool {
   /** What is the tool? */
   description: string
   /** Runtime representation of the structured output. */
-  type: T
+  type?: T.ObjectTy
   /** The fn that receives the parameters and returns information related to the call. */
-  f: (args: InstanceType<T>) => unknown
+  f: (arg?: unknown) => unknown
 }
 
 export function formatSessionConfigUpdate(config: SessionConfig): SessionConfig_ {
@@ -50,12 +63,9 @@ export function formatSessionConfigUpdate(config: SessionConfig): SessionConfig_
       : { turn_detection: null },
     ...config.tools
       ? {
-        tools: Object.entries(config.tools).map(([name, { description, type }]) => ({
-          type: "function",
-          name,
-          description,
-          parameters: schema({ type }, "type"),
-        })),
+        tools: Object.entries(config.tools).map(([name, { description, type }]) =>
+          type ? T.F(name, description, { type }, "type") : T.F(name, description)
+        ),
       }
       : {},
     ...config.voice ? { voice: config.voice } : {},
