@@ -2,14 +2,15 @@
   "name": "@crosshatch/galatea",
   "version": "0.0.0-beta.1",
   "exports": "./mod.ts",
-  "exclude": ["target"],
+  "exclude": ["console", "target"],
+  "lock": false,
   "tasks": {
+    "check": "deno check . && cd console && ./node_modules/.bin/tsc",
     "mod": "deno run -A https://deno.land/x/moderate@0.0.5/mod.ts && dprint fmt",
     "test": "deno test -A",
     "test:update": "deno task test -- --update",
-    "www": "deno run -A npm:vite",
-    "www:build": "deno run -A npm:vite build --emptyOutDir",
-    "galatea": "deno run -A main.ts"
+    "galatea": "deno run -A main.ts",
+    "www": "cd console && ./node_modules/.bin/vite"
   },
   "imports": {
     "@deno/dnt": "jsr:@deno/dnt@^0.41.3",
@@ -27,17 +28,10 @@
     "@std/testing": "jsr:@std/testing@^1.0.3",
     "@std/text": "jsr:@std/text@^1.0.7",
     "@types/json-schema": "npm:@types/json-schema@^7.0.15",
-    "@types/react": "npm:@types/react@^18.3.11",
-    "@types/react-dom": "npm:@types/react-dom@^18.3.1",
     "@vitejs/plugin-react-swc": "npm:@vitejs/plugin-react-swc@^3.7.1",
     "audio-decode": "npm:audio-decode@^2.2.2",
     "openai": "npm:openai@^4.68.1",
-    "react": "https://esm.sh/react@18.3.1",
-    "react-dom": "https://esm.sh/react-dom@18.2.0",
-    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
-    "react/": "https://esm.sh/react@18.3.1/",
-    "structured-outputs": "npm:structured-outputs@^0.1.0-beta.6",
-    "vite": "npm:vite@^5.4.8"
+    "structured-outputs": "npm:structured-outputs@^0.1.0-beta.6"
   },
   "scopes": {
     "./examples/": {

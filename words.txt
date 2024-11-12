@@ -1,6 +1,8 @@
 alaw
 camelcase
+clsx
 ctls
+dotenvx
 dprint
 galitea
 harrysolovay
@@ -8,7 +10,9 @@ intf
 nullary
 openai
 proxied
+roboto
 sqlx
+tailwindcss
 tsdoc
 tsdocs
 ulaw

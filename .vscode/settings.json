@@ -1,4 +1,7 @@
 {
+  "[css]": {
+    "editor.defaultFormatter": "dprint.dprint"
+  },
   "[html]": {
     "editor.defaultFormatter": "dprint.dprint"
   },
@@ -6,6 +9,9 @@
     "editor.defaultFormatter": "dprint.dprint"
   },
   "[jsonc]": {
+    "editor.defaultFormatter": "dprint.dprint"
+  },
+  "[javascript]": {
     "editor.defaultFormatter": "dprint.dprint"
   },
   "[markdown]": {
@@ -21,5 +27,6 @@
     "editor.defaultFormatter": "dprint.dprint"
   },
   "editor.formatOnSave": true,
-  "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "deno.disablePaths": ["tsconfig.json", "console"]
 }
