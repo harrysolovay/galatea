@@ -1,1 +1,1 @@
-export type Voice = "alloy" | "echo" | "shimmer"
+export type Voice = "alloy" | "ash" | "ballard" | "echo" | "sage" | "shimmer" | "verse"
