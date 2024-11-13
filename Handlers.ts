@@ -1,7 +1,6 @@
-import { assert, assertEquals, assertExists } from "@std/assert"
+import { assertEquals, assertExists } from "@std/assert"
 import { decodeBase64 } from "@std/encoding"
 import type { ServerEvents } from "./events/mod.ts"
-import { Item } from "./models/Item.ts"
 import type { ErrorDetails, ItemResource, SessionResource } from "./models/mod.ts"
 import { Listeners } from "./util/Listeners.ts"
 
@@ -10,7 +9,7 @@ export class Context {
   previous_item_id?: string
 
   itemLookup: Record<string, ItemResource> = {}
-  itemAudio = new WeakMap<ItemResource, string[]>()
+  itemAudio = new WeakMap<ItemResource, Int16Array[]>()
 
   textListeners
   inputTextListeners
@@ -19,7 +18,7 @@ export class Context {
   constructor(readonly signal: AbortSignal) {
     this.textListeners = new Listeners<string>(signal)
     this.inputTextListeners = new Listeners<string>(signal)
-    this.audioListeners = new Listeners<string[]>(signal)
+    this.audioListeners = new Listeners<Int16Array[]>(signal)
     this.errorListeners = new Listeners<ErrorDetails>(signal)
   }
 }
@@ -52,12 +51,12 @@ export const handlers: Handlers = {
   "response.audio.delta"({ item_id, delta }) {
     const item = this.itemLookup[item_id]
     assertExists(item)
-    const audio = this.itemAudio.get(item)
-    if (audio) {
-      audio.push(delta)
-    } else {
-      this.itemAudio.set(item, [delta])
+    let audio = this.itemAudio.get(item)
+    if (!audio) {
+      audio = []
+      this.itemAudio.set(item, audio)
     }
+    audio.push(new Int16Array(decodeBase64(delta).buffer))
   },
   "response.audio.done"({ item_id }) {
     const item = this.itemLookup[item_id]
@@ -77,9 +76,7 @@ export const handlers: Handlers = {
   "response.done"() {},
   "response.function_call_arguments.delta"() {},
   "response.function_call_arguments.done"() {},
-  "response.output_item.added"({ item, output_index }) {
-    console.log({ OUTPUT_ITEM: { item, output_index } })
-  },
+  "response.output_item.added"() {},
   "response.output_item.done"() {},
   "response.text.delta"() {},
   "response.text.done"() {},
@@ -87,33 +84,3 @@ export const handlers: Handlers = {
 
 export type Handlers = { [K in keyof ServerEvents]: Handler<K> }
 export type Handler<K extends keyof ServerEvents> = (this: Context, args: ServerEvents[K]) => void | Promise<void>
-
-function base64ToArrayBuffer(base64: string) {
-  const binaryString = atob(base64)
-  const len = binaryString.length
-  const bytes = new Uint8Array(len)
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i)
-  }
-  return bytes.buffer
-}
-
-function mergeInt16Arrays(left: ArrayBufferLike, right: ArrayBufferLike) {
-  if (left instanceof ArrayBuffer) {
-    left = new Int16Array(left)
-  }
-  if (right instanceof ArrayBuffer) {
-    right = new Int16Array(right)
-  }
-  if (!(left instanceof Int16Array) || !(right instanceof Int16Array)) {
-    throw new Error(`Both items must be Int16Array`)
-  }
-  const newValues = new Int16Array(left.length + right.length)
-  for (let i = 0; i < left.length; i++) {
-    newValues[i] = left[i]!
-  }
-  for (let j = 0; j < right.length; j++) {
-    newValues[left.length + j] = right[j]!
-  }
-  return newValues
-}

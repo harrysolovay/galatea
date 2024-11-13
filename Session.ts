@@ -12,7 +12,7 @@ export interface Session {
   /** Get a writable stream with which to append audio to the input buffer. */
   audioInput(): WritableStream<Int16Array>
   /** Get a readable stream of PCM-encoded audio chunks. */
-  audio(): ReadableStream<string[]>
+  audio(): ReadableStream<Int16Array[]>
   /** Get a readable stream of audio input transcript tokens. */
   inputText(): ReadableStream<string>
   /** Get a readable stream of response text tokens. */

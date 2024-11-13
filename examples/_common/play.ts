@@ -11,3 +11,11 @@ export function play(buf: AudioBuffer) {
   source.start(queueTime)
   queueTime += buf.duration
 }
+
+export function audioOutput() {
+  return new WritableStream<AudioBuffer>({
+    write(chunk) {
+      play(chunk)
+    },
+  })
+}
