@@ -1,27 +1,23 @@
+import { encodeBase64 } from "@std/encoding"
 import { Context } from "./Context.ts"
 import type { ClientEvent, ServerEvent } from "./events/mod.ts"
 import { handlers } from "./handlers.ts"
 import { listen } from "./listen.ts"
 import type { Content, ErrorDetails } from "./models/mod.ts"
 import { formatSessionConfigUpdate, type SessionConfig, type SessionUpdateConfig } from "./SessionConfig.ts"
-import { base64Encode } from "./util/arrayBufferToBase64.ts"
 import { generateId } from "./util/id.ts"
 
 export interface Session {
   /** Get a writable stream with which to append text to the input buffer. */
-  appendText(text: string): void
+  textInput(): WritableStream<string>
   /** Get a writable stream with which to append audio to the input buffer. */
   audioInput(): WritableStream<Int16Array>
   /** Get a readable stream of PCM-encoded audio chunks. */
   audio(): ReadableStream<Int16Array>
-  /** Get a readable stream of audio transcript tokens. */
-  transcript(includeInput?: boolean): ReadableStream<string>
-  /** Commit the current buffer and trigger a response (if turn detection enabled). */
-  commit(): void
-  /** Trigger a response (if turn detection enabled). */
-  respond(): void
-  /** Cancel a previously-triggered response generation. */
-  cancelResponse(): void
+  /** Get a readable stream of audio input transcript tokens. */
+  inputText(): ReadableStream<string>
+  /** Get a readable stream of response text tokens. */
+  text(): ReadableStream<string>
   /** Update the session configuration. */
   update(sessionUpdateConfig: SessionUpdateConfig): void
   /** Get a readable stream with which to observe errors. */
@@ -38,7 +34,10 @@ export function Session(connect: () => WebSocket, config?: SessionConfig): Sessi
 
   const send = listen<ClientEvent, ServerEvent>(
     connect,
-    (event) => handlers[event.type].call(context, event as never),
+    (event) => {
+      console.log(event)
+      return handlers[event.type].call(context, event as never)
+    },
     ctl.signal,
   )
 
@@ -73,9 +72,9 @@ export function Session(connect: () => WebSocket, config?: SessionConfig): Sessi
   function audioInput() {
     return new WritableStream<Int16Array>({
       write(chunk) {
-        createItem({
-          type: "input_audio",
-          audio: base64Encode(chunk),
+        send({
+          type: "input_audio_buffer.append",
+          audio: encodeBase64(chunk),
         })
       },
     })

@@ -7,8 +7,10 @@ dprint
 galitea
 harrysolovay
 intf
+mutefish
 nullary
 openai
+portaudio
 proxied
 roboto
 sqlx
