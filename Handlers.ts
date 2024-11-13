@@ -9,9 +9,8 @@ export class Context {
   sessionResource?: SessionResource
   previous_item_id?: string
 
-  pendingAudio?: Int16Array
-
   itemLookup: Record<string, ItemResource> = {}
+  itemAudio = new WeakMap<ItemResource, string[]>()
 
   textListeners
   inputTextListeners
@@ -20,7 +19,7 @@ export class Context {
   constructor(readonly signal: AbortSignal) {
     this.textListeners = new Listeners<string>(signal)
     this.inputTextListeners = new Listeners<string>(signal)
-    this.audioListeners = new Listeners<Int16Array>(signal)
+    this.audioListeners = new Listeners<string[]>(signal)
     this.errorListeners = new Listeners<ErrorDetails>(signal)
   }
 }
@@ -53,13 +52,20 @@ export const handlers: Handlers = {
   "response.audio.delta"({ item_id, delta }) {
     const item = this.itemLookup[item_id]
     assertExists(item)
-    const audio = base64ToArrayBuffer(delta)
-    this.pendingAudio = this.pendingAudio ? mergeInt16Arrays(this.pendingAudio, audio) : new Int16Array(audio)
+    const audio = this.itemAudio.get(item)
+    if (audio) {
+      audio.push(delta)
+    } else {
+      this.itemAudio.set(item, [delta])
+    }
   },
-  "response.audio.done"() {
-    const { pendingAudio } = this
-    assertExists(pendingAudio)
-    this.audioListeners.enqueue(() => pendingAudio)
+  "response.audio.done"({ item_id }) {
+    const item = this.itemLookup[item_id]
+    assertExists(item)
+    const audio = this.itemAudio.get(item)
+    assertExists(audio)
+    this.audioListeners.enqueue(() => audio)
+    delete this.itemLookup[item_id]
   },
   "response.audio_transcript.delta"({ delta }) {
     this.inputTextListeners.enqueue(() => delta)
@@ -71,7 +77,9 @@ export const handlers: Handlers = {
   "response.done"() {},
   "response.function_call_arguments.delta"() {},
   "response.function_call_arguments.done"() {},
-  "response.output_item.added"() {},
+  "response.output_item.added"({ item, output_index }) {
+    console.log({ OUTPUT_ITEM: { item, output_index } })
+  },
   "response.output_item.done"() {},
   "response.text.delta"() {},
   "response.text.done"() {},
