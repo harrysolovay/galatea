@@ -40,7 +40,7 @@ type MessageItemBase<R extends Role, C extends Content> = ItemBase<"message"> & 
 type ItemBase<K extends string> = {
   type: K
   /** The unique ID of the item. */
-  id: string
+  id?: string
   /** The status of the item */
   status: "completed" | "incomplete"
 }

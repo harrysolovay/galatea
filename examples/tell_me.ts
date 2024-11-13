@@ -1,34 +1,19 @@
-import { conn, Session } from "galatea"
-import "@std/dotenv/load"
+import { AudioContext } from "@mutefish/web-audio-api"
 import { fromFileUrl } from "@std/path"
-import { decoders } from "audio-decode"
-import { floatTo16BitPCM } from "../util/floatTo16BitPCM.ts"
 
-// const session = Session(() => conn(Deno.env.get("OPENAI_API_KEY")!))
+const ctx = new AudioContext()
+const wavPath = fromFileUrl(import.meta.resolve("./tell_me.wav"))
+const bytes = await Deno.readFile(wavPath)
 
-const bytes = await Deno.readFile(fromFileUrl(import.meta.resolve("./tell_me.wav")))
-const decoded = await decoders.wav(bytes)
-console.log(decoded.sampleRate)
-// const channel0 = decoded.getChannelData(0)
-// const stream = new ReadableStream<Int16Array>({
-//   start(ctl) {
-//     ctl.enqueue(chunk)
-//     ctl.close()
-//   },
-// })
-// stream.pipeTo(session.audioInput())
-// setTimeout(() => {
-//   session.commit()
-// }, 3000)
+let queueTime = 0
 
-// function base64EncodeAudio(float32Array: Float32Array) {
-//   const arrayBuffer = floatTo16BitPCM(float32Array)
-//   let binary = ""
-//   const bytes = new Uint8Array(arrayBuffer)
-//   const chunkSize = 0x8000 // 32KB chunk size
-//   for (let i = 0; i < bytes.length; i += chunkSize) {
-//     const chunk = bytes.subarray(i, i + chunkSize)
-//     binary += String.fromCharCode.apply(null, [...chunk])
-//   }
-//   return btoa(binary)
-// }
+playWav(bytes)
+
+async function playWav(bytes: Uint8Array) {
+  const audioBuffer = await ctx.decodeAudioData(bytes.buffer)
+  const source = ctx.createBufferSource()
+  source.buffer = audioBuffer
+  source.connect(ctx.destination)
+  source.start(queueTime)
+  queueTime += audioBuffer.duration
+}

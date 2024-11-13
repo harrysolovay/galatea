@@ -1,6 +1,29 @@
+import { assert, assertEquals, assertExists } from "@std/assert"
 import { decodeBase64 } from "@std/encoding"
-import type { Context } from "./Context.ts"
 import type { ServerEvents } from "./events/mod.ts"
+import { Item } from "./models/Item.ts"
+import type { ErrorDetails, ItemResource, SessionResource } from "./models/mod.ts"
+import { Listeners } from "./util/Listeners.ts"
+
+export class Context {
+  sessionResource?: SessionResource
+  previous_item_id?: string
+
+  pendingAudio?: Int16Array
+
+  itemLookup: Record<string, ItemResource> = {}
+
+  textListeners
+  inputTextListeners
+  audioListeners
+  errorListeners
+  constructor(readonly signal: AbortSignal) {
+    this.textListeners = new Listeners<string>(signal)
+    this.inputTextListeners = new Listeners<string>(signal)
+    this.audioListeners = new Listeners<Int16Array>(signal)
+    this.errorListeners = new Listeners<ErrorDetails>(signal)
+  }
+}
 
 export const handlers: Handlers = {
   error({ error }) {
@@ -13,7 +36,11 @@ export const handlers: Handlers = {
     this.sessionResource = session
   },
   "conversation.created"() {},
-  "conversation.item.created"() {},
+  "conversation.item.created"({ item, previous_item_id }) {
+    assertEquals(this.previous_item_id, previous_item_id ?? undefined)
+    this.itemLookup[item.id] = item
+    this.previous_item_id = item.id ?? undefined
+  },
   "conversation.item.deleted"() {},
   "conversation.item.input_audio_transcription.completed"() {},
   "conversation.item.input_audio_transcription.failed"() {},
@@ -23,13 +50,19 @@ export const handlers: Handlers = {
   "input_audio_buffer.speech_started"() {},
   "input_audio_buffer.speech_stopped"() {},
   "rate_limits.updated"() {},
-  "response.audio.delta"({ delta }) {
-    const { buffer } = decodeBase64(delta)
-    this.audioListeners.enqueue(() => new Int16Array(buffer))
+  "response.audio.delta"({ item_id, delta }) {
+    const item = this.itemLookup[item_id]
+    assertExists(item)
+    const audio = base64ToArrayBuffer(delta)
+    this.pendingAudio = this.pendingAudio ? mergeInt16Arrays(this.pendingAudio, audio) : new Int16Array(audio)
   },
-  "response.audio.done"() {},
+  "response.audio.done"() {
+    const { pendingAudio } = this
+    assertExists(pendingAudio)
+    this.audioListeners.enqueue(() => pendingAudio)
+  },
   "response.audio_transcript.delta"({ delta }) {
-    this.transcriptListeners.enqueue(() => delta)
+    this.inputTextListeners.enqueue(() => delta)
   },
   "response.audio_transcript.done"() {},
   "response.content_part.added"() {},
@@ -46,3 +79,33 @@ export const handlers: Handlers = {
 
 export type Handlers = { [K in keyof ServerEvents]: Handler<K> }
 export type Handler<K extends keyof ServerEvents> = (this: Context, args: ServerEvents[K]) => void | Promise<void>
+
+function base64ToArrayBuffer(base64: string) {
+  const binaryString = atob(base64)
+  const len = binaryString.length
+  const bytes = new Uint8Array(len)
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i)
+  }
+  return bytes.buffer
+}
+
+function mergeInt16Arrays(left: ArrayBufferLike, right: ArrayBufferLike) {
+  if (left instanceof ArrayBuffer) {
+    left = new Int16Array(left)
+  }
+  if (right instanceof ArrayBuffer) {
+    right = new Int16Array(right)
+  }
+  if (!(left instanceof Int16Array) || !(right instanceof Int16Array)) {
+    throw new Error(`Both items must be Int16Array`)
+  }
+  const newValues = new Int16Array(left.length + right.length)
+  for (let i = 0; i < left.length; i++) {
+    newValues[i] = left[i]!
+  }
+  for (let j = 0; j < right.length; j++) {
+    newValues[left.length + j] = right[j]!
+  }
+  return newValues
+}

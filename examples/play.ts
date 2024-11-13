@@ -1,18 +1,26 @@
+import { conn, Session } from "galatea"
+import "@std/dotenv/load"
 import { AudioContext } from "@mutefish/web-audio-api"
-import { fromFileUrl } from "@std/path"
 
-const ctx = new AudioContext()
-const wavPath = fromFileUrl(import.meta.resolve("./tell_me.wav"))
-const bytes = await Deno.readFile(wavPath)
+const session = Session(() => conn(Deno.env.get("OPENAI_API_KEY")!))
 
+const ctx = new AudioContext({ sampleRate: 24_000 })
 let queueTime = 0
-playWav(bytes)
 
-async function playWav(bytes: Uint8Array) {
-  const audioBuffer = await ctx.decodeAudioData(bytes.buffer)
-  const source = ctx.createBufferSource()
-  source.buffer = audioBuffer
-  source.connect(ctx.destination)
-  source.start(queueTime)
-  queueTime += audioBuffer.duration
-}
+session.audio().pipeTo(
+  new WritableStream({
+    async write(chunk) {
+      const audioBuffer = await ctx.decodeAudioData(chunk.buffer)
+      const source = ctx.createBufferSource()
+      source.buffer = audioBuffer
+      source.connect(ctx.destination)
+      source.start(queueTime)
+      queueTime += audioBuffer.duration
+    },
+  }),
+)
+
+const textInput = session.textInput().getWriter()
+textInput.write("Tell me about Galatea from the story of Pygmalion")
+textInput.releaseLock()
+session.respond()

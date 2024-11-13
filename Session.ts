@@ -1,7 +1,6 @@
 import { encodeBase64 } from "@std/encoding"
-import { Context } from "./Context.ts"
 import type { ClientEvent, ServerEvent } from "./events/mod.ts"
-import { handlers } from "./handlers.ts"
+import { Context, handlers } from "./handlers.ts"
 import { listen } from "./listen.ts"
 import type { Content, ErrorDetails } from "./models/mod.ts"
 import { formatSessionConfigUpdate, type SessionConfig, type SessionUpdateConfig } from "./SessionConfig.ts"
@@ -20,6 +19,8 @@ export interface Session {
   text(): ReadableStream<string>
   /** Update the session configuration. */
   update(sessionUpdateConfig: SessionUpdateConfig): void
+  /** Trigger response generation. */
+  respond(): void
   /** Get a readable stream with which to observe errors. */
   errors(): ReadableStream<ErrorDetails>
   /** End the session. */
@@ -35,7 +36,7 @@ export function Session(connect: () => WebSocket, config?: SessionConfig): Sessi
   const send = listen<ClientEvent, ServerEvent>(
     connect,
     (event) => {
-      console.log(event)
+      console.log(event.type)
       return handlers[event.type].call(context, event as never)
     },
     ctl.signal,
@@ -49,23 +50,26 @@ export function Session(connect: () => WebSocket, config?: SessionConfig): Sessi
   }
 
   return {
-    appendText,
+    textInput,
     audioInput,
     audio,
-    transcript,
-    commit,
+    inputText,
+    text,
     respond,
-    cancelResponse,
     update,
     errors,
     end,
     turnDetection,
   }
 
-  function appendText(text: string) {
-    createItem({
-      type: "input_text",
-      text,
+  function textInput() {
+    return new WritableStream<string>({
+      write(text) {
+        createItem({
+          type: "input_text",
+          text,
+        })
+      },
     })
   }
 
@@ -94,39 +98,22 @@ export function Session(connect: () => WebSocket, config?: SessionConfig): Sessi
         content: [item],
       },
     })
-    context.previous_item_id = id
   }
 
   function audio() {
     return context.audioListeners.stream()
   }
 
-  // TODO: automatically send disable transcript when no longer in use
-  function transcript(includeInput?: boolean) {
-    if (includeInput && (!(context.sessionResource && context.sessionResource.input_audio_transcription))) {
-      send({
-        type: "session.update",
-        session: {
-          input_audio_transcription: {
-            model: "whisper-1",
-          },
-        },
-      })
-    }
-    return context.transcriptListeners.stream()
+  function inputText() {
+    return context.inputTextListeners.stream()
   }
 
-  function commit() {
-    send({ type: "input_audio_buffer.commit" })
-    respond()
+  function text() {
+    return context.textListeners.stream()
   }
 
   function respond() {
     send({ type: "response.create" })
-  }
-
-  function cancelResponse() {
-    send({ type: "response.cancel" })
   }
 
   function update(config: SessionUpdateConfig) {
