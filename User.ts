@@ -1,4 +1,4 @@
-import { base64EncodeAudio } from "./audio_util/encodePcm.ts"
+import { base64EncodeAudio } from "./audio/encodePcm.ts"
 import type { Content } from "./models/mod.ts"
 import type { Session } from "./Session.ts"
 

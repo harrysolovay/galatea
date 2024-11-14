@@ -1,5 +1,5 @@
-import { AudioContext, audioInput, audioOutput } from "audio-util"
 import { conn, SAMPLE_RATE, Session } from "galatea"
+import { AudioContext, audioInput, audioOutput } from "../audio/mod.ts"
 import "@std/dotenv/load"
 
 const session = new Session(() => conn(Deno.env.get("OPENAI_API_KEY")!))

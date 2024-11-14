@@ -1,7 +1,7 @@
 import { conn, Session } from "galatea"
 import "@std/dotenv/load"
 import { parseArgs } from "@std/cli"
-import { audioInput } from "audio-util"
+import { audioInput } from "../audio/mod.ts"
 
 const { port } = parseArgs(Deno.args, { string: ["port"] })
 if (port) {
