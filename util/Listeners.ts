@@ -3,14 +3,14 @@ export class Listeners<T> extends Set<ReadableStreamDefaultController<T>> {
     super()
   }
 
-  enqueue(getChunk: () => T) {
+  enqueue(getChunk: () => T): void {
     if (this.size) {
       const chunk = getChunk()
       this.forEach((ctl) => ctl.enqueue(chunk))
     }
   }
 
-  stream() {
+  stream(): ReadableStream<T> {
     const { signal } = this
     const detachCtl = new AbortController()
     signal.addEventListener("abort", () => detachCtl.abort())

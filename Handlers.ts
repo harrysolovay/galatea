@@ -5,29 +5,24 @@ import type { ErrorDetails, ItemResource, SessionResource } from "./models/mod.t
 import { Listeners } from "./util/Listeners.ts"
 
 export class SessionState {
-  sessionResource?: SessionResource
-  previous_item_id?: string
+  ctl: AbortController = new AbortController()
+
+  declare sessionResource?: SessionResource
+  declare previous_item_id?: string
 
   itemLookup: Record<string, ItemResource> = {}
 
-  textListeners
-  inputTextListeners
-  audioListeners
-  errorListeners
-  constructor(readonly signal: AbortSignal) {
-    this.textListeners = new Listeners<string>(signal)
-    this.inputTextListeners = new Listeners<string>(signal)
-    this.audioListeners = new Listeners<Int16Array>(signal)
-    this.errorListeners = new Listeners<ErrorDetails>(signal)
-  }
+  assistantTextListeners: Listeners<string> = new Listeners(this.ctl.signal)
+  assistantAudioListeners: Listeners<Int16Array> = new Listeners(this.ctl.signal)
+  userAudioTranscriptListeners: Listeners<string> = new Listeners(this.ctl.signal)
+  serverErrorListeners: Listeners<ErrorDetails> = new Listeners(this.ctl.signal)
 }
 
 export const handlers: Handlers = {
   error({ error }) {
-    this.errorListeners.enqueue(() => error)
+    this.serverErrorListeners.enqueue(() => error)
   },
   "session.created"({ session }) {
-    console.log(session)
     this.sessionResource = session
   },
   "session.updated"({ session }) {
@@ -51,24 +46,15 @@ export const handlers: Handlers = {
   "response.audio.delta"({ item_id, delta }) {
     const item = this.itemLookup[item_id]
     assertExists(item)
-    this.audioListeners.enqueue(() => new Int16Array(decodeBase64(delta).buffer))
-    // let audio = this.itemAudio.get(item)
-    // if (!audio) {
-    //   audio = []
-    //   this.itemAudio.set(item, audio)
-    // }
-    // audio.push(new Int16Array(decodeBase64(delta).buffer))
+    this.assistantAudioListeners.enqueue(() => new Int16Array(decodeBase64(delta).buffer))
   },
   "response.audio.done"({ item_id }) {
-    // const item = this.itemLookup[item_id]
-    // assertExists(item)
-    // const audio = this.itemAudio.get(item)
-    // assertExists(audio)
-    // this.audioListeners.enqueue(() => audio)
+    const item = this.itemLookup[item_id]
+    assertExists(item)
     delete this.itemLookup[item_id]
   },
   "response.audio_transcript.delta"({ delta }) {
-    this.inputTextListeners.enqueue(() => delta)
+    this.userAudioTranscriptListeners.enqueue(() => delta)
   },
   "response.audio_transcript.done"() {},
   "response.content_part.added"() {},

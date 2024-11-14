@@ -7,7 +7,7 @@ export class User {
 
   /** Get a writable stream to which text and audio chunks can be written. */
   writeable(): WritableStream<string | Float32Array> {
-    return new WritableStream<string | Float32Array>({
+    return new WritableStream({
       write: (value) => {
         this.write(value)
       },
@@ -31,15 +31,16 @@ export class User {
 
   /** Get a readable stream of the user audio transcript. */
   audioTranscript(): ReadableStream<string> {
-    return this.session.state.inputTextListeners.stream()
+    return this.session.state.userAudioTranscriptListeners.stream()
   }
 
   /** Get a readable stream of the user audio base64-decoded pcm-decoded chunks. */
   audio(): ReadableStream<Int16Array> {
-    return this.session.state.audioListeners.stream()
+    return this.session.state.assistantAudioListeners.stream()
   }
 
-  createItem(item: Content) {
+  /** Add an item to the conversation. */
+  private createItem(item: Content): void {
     const { previous_item_id } = this.session.state
     this.session.send({
       type: "conversation.item.create",

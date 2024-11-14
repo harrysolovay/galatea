@@ -17,7 +17,7 @@ toggleAudioInput()
 }
 
 function _toggleTurnDetection() {
-  const turnDetection = !!session.state.sessionResource?.turn_detection
+  const turnDetection = !session.turnDetection()
   session.update({ turnDetection })
   if (turnDetection !== !!input) toggleAudioInput()
 }

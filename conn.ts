@@ -1,3 +1,5 @@
+import { REALTIME_ENDPOINT, REALTIME_MODEL } from "./constants.ts"
+
 export function conn(apiKey: string): WebSocket {
   return new WebSocket(`${REALTIME_ENDPOINT}?model=${REALTIME_MODEL}`, [
     "realtime",
@@ -5,12 +7,9 @@ export function conn(apiKey: string): WebSocket {
   ])
 }
 
-export function realtimeHeaders(apiKey: string) {
+export function realtimeHeaders(apiKey: string): Record<string, string> {
   return {
     "openai-beta": "realtime-v1",
     "openai-insecure-api-key": apiKey,
   }
 }
-
-const REALTIME_ENDPOINT = "wss://api.openai.com/v1/realtime"
-const REALTIME_MODEL = "gpt-4o-realtime-preview-2024-10-01"

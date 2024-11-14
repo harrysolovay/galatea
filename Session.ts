@@ -2,24 +2,23 @@ import { Assistant } from "./Assistant.ts"
 import type { ClientEvent, ServerEvent } from "./events/mod.ts"
 import { handlers, SessionState } from "./handlers.ts"
 import { listen } from "./listen.ts"
+import type { ErrorDetails } from "./models/mod.ts"
 import { formatSessionConfigUpdate, type SessionConfig, type SessionUpdateConfig } from "./SessionConfig.ts"
 import { User } from "./User.ts"
 
 export class Session {
-  #ctl = new AbortController()
+  state: SessionState = new SessionState()
+  user: User = new User(this)
+  assistant: Assistant = new Assistant(this)
 
-  state = new SessionState(this.#ctl.signal)
-  user = new User(this)
-  assistant = new Assistant(this)
-
-  send
+  send: (event: ClientEvent) => void
   constructor(readonly connect: () => WebSocket, config?: SessionConfig) {
     this.send = listen<ClientEvent, ServerEvent>(
       connect,
       (event) => {
         return handlers[event.type].call(this.state, event as never)
       },
-      this.#ctl.signal,
+      this.state.ctl.signal,
     )
     if (config) {
       this.update(config)
@@ -39,9 +38,14 @@ export class Session {
     })
   }
 
+  /** Get a readable stream of any server error details. */
+  error(): ReadableStream<ErrorDetails> {
+    return this.state.serverErrorListeners.stream()
+  }
+
   /** End the conversation and clean up resources. */
   end(): void {
-    this.#ctl.abort()
+    this.state.ctl.abort()
   }
 
   /** Get the latest turn detection state resolved from the server. */
@@ -50,5 +54,13 @@ export class Session {
       return true
     }
     return !!this.state.sessionResource.turn_detection
+  }
+
+  setCommitInterval(ms: number): number {
+    return setInterval(() => {
+      this.send({
+        type: "input_audio_buffer.commit",
+      })
+    }, ms)
   }
 }

@@ -4,14 +4,14 @@ import { parseArgs } from "@std/cli"
 import { audioInput } from "audio-util"
 
 const { port } = parseArgs(Deno.args, { string: ["port"] })
-
 if (port) {
   const session = new Session(() => new WebSocket(`ws://localhost:${port}`))
   audioInput().pipeTo(session.user.writeable())
-  session.assistant
+  await session.assistant
     .text()
     .pipeThrough(new TextEncoderStream())
     .pipeTo(Deno.stdout.writable)
+  Deno.exit(0)
 }
 
 const server = Deno.serve((req) => {

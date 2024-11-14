@@ -9,3 +9,5 @@ const audioCtx = new AudioContext({ sampleRate: SAMPLE_RATE })
 session.assistant.audio().pipeTo(audioOutput(audioCtx))
 
 audioInput().pipeTo(session.user.writeable())
+
+session.setCommitInterval(250)
