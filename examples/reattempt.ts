@@ -1,73 +1,86 @@
 import { PortAudio, SampleFormat, StreamFlags } from "portaudio"
 
-const NUM_SECONDS = 5
-const SAMPLE_RATE = 16_000
+const SAMPLE_RATE = 44_100
 const FRAMES_PER_BUFFER = 1024
 
 PortAudio.initialize()
 
-const inputDevice = PortAudio.getDefaultInputDevice()
+function audioInput() {
+  const inputDevice = PortAudio.getDefaultInputDevice()
+  const inputStream = PortAudio.openStream(
+    {
+      device: inputDevice,
+      channelCount: 1,
+      sampleFormat: SampleFormat.float32,
+      suggestedLatency: PortAudio.getDeviceInfo(inputDevice).defaultLowInputLatency,
+    },
+    null,
+    SAMPLE_RATE,
+    FRAMES_PER_BUFFER,
+    StreamFlags.clipOff,
+  )
+  return new ReadableStream<Float32Array>({
+    start() {
+      PortAudio.startStream(inputStream)
+    },
+    pull(ctl) {
+      while (true) {
+        const available = PortAudio.getStreamReadAvailable(inputStream)
+        if (available >= FRAMES_PER_BUFFER) {
+          const chunk = new Float32Array(FRAMES_PER_BUFFER)
+          PortAudio.readStream(inputStream, chunk, FRAMES_PER_BUFFER)
+          ctl.enqueue(chunk)
+          break
+        }
+      }
+    },
+    cancel() {
+      PortAudio.closeStream(inputStream)
+    },
+  })
+}
 
-const inputStream = PortAudio.openStream(
-  {
-    device: inputDevice,
-    channelCount: 1,
-    sampleFormat: SampleFormat.int32,
-    suggestedLatency: PortAudio.getDeviceInfo(inputDevice).defaultLowInputLatency,
-  },
+const buffers = await Array.fromAsync(setCancellationTimeout(audioInput(), 5000))
+
+const outputDevice = PortAudio.getDefaultOutputDevice()
+const outputStream = PortAudio.openStream(
   null,
+  {
+    device: outputDevice,
+    channelCount: 1,
+    sampleFormat: SampleFormat.float32,
+    suggestedLatency: PortAudio.getDeviceInfo(outputDevice).defaultLowOutputLatency,
+  },
   SAMPLE_RATE,
   FRAMES_PER_BUFFER,
   StreamFlags.clipOff,
 )
-
-PortAudio.startStream(inputStream)
-
-const end = () => {
-  PortAudio.closeStream(inputStream)
-  PortAudio.terminate()
+PortAudio.startStream(outputStream)
+for (const buffer of buffers) {
+  PortAudio.writeStream(outputStream, buffer, FRAMES_PER_BUFFER)
 }
+PortAudio.closeStream(outputStream)
+PortAudio.terminate()
 
-console.log("=== Now recording!! Please speak into the microphone. ===")
-
-const TOTAL_SAMPLES = NUM_SECONDS * SAMPLE_RATE
-const buf = new Int32Array(TOTAL_SAMPLES + FRAMES_PER_BUFFER)
-
-let recorded = 0
-
-while (recorded < TOTAL_SAMPLES) {
-  const available = PortAudio.getStreamReadAvailable(inputStream)
-  if (available > FRAMES_PER_BUFFER) {
-    const buffer = new Int32Array(FRAMES_PER_BUFFER)
-    PortAudio.readStream(inputStream, buffer, FRAMES_PER_BUFFER)
-    buf.set(buffer, recorded)
-    recorded += FRAMES_PER_BUFFER as number
-  }
-}
-
-end()
-
-await save("demo.wav", buf)
-
-async function save(dest: string, buf: Int32Array) {
-  const fileBuffer = new ArrayBuffer(44 + TOTAL_SAMPLES * 4)
-  const view = new DataView(fileBuffer)
-  const NUM_CHANNELS = 1
-  view.setInt32(0, 0x52494646) // "RIFF"
-  view.setInt32(4, 36 + TOTAL_SAMPLES * 4) // file size - 8
-  view.setInt32(8, 0x57415645) // "WAVE"
-  view.setInt32(12, 0x666d7420) // "fmt "
-  view.setInt32(16, 16, true) // fmt header size
-  view.setInt16(20, 1, true) // audio format, PCM = 1
-  view.setInt16(22, NUM_CHANNELS, true) // number of channels
-  view.setInt32(24, SAMPLE_RATE, true) // sample rate
-  view.setInt32(28, SAMPLE_RATE * NUM_CHANNELS * 4, true) // byte rate (sample rate * number of channels * bytes per sample)
-  view.setInt16(32, NUM_CHANNELS * 4, true) // block alignment (number of channels * bytes per sample)
-  view.setInt16(34, 32, true) // bits per sample
-  view.setInt32(36, 0x64617461) // "data"
-  view.setInt32(40, TOTAL_SAMPLES * 4, true) // number of bytes in rest of data
-  for (let i = 0; i < TOTAL_SAMPLES; i++) {
-    view.setInt32(44 + (i * 4), buf[i]!, true)
-  }
-  await Deno.writeFile(dest, new Uint8Array(fileBuffer))
+function setCancellationTimeout<T>(stream: ReadableStream<T>, ms: number): ReadableStream<T> {
+  const reader = stream.getReader()
+  const startTime = Date.now()
+  return new ReadableStream<T>({
+    async pull(ctl) {
+      const { done, value } = await reader.read()
+      if (done) {
+        ctl.close()
+        return
+      }
+      if (Date.now() - startTime < ms) {
+        ctl.enqueue(value)
+      } else {
+        ctl.close()
+        reader.cancel()
+      }
+    },
+    cancel(reason) {
+      reader.cancel(reason)
+    },
+  })
 }
