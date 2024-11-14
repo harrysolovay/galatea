@@ -5,6 +5,7 @@ import { audioOutput } from "../audio/mod.ts"
 
 const session = new Session(() => conn(Deno.env.get("OPENAI_API_KEY")!), {
   turnDetection: false,
+  voice: "shimmer",
 })
 
 const audioCtx = new AudioContext({ sampleRate: SAMPLE_RATE })

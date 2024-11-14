@@ -3,7 +3,6 @@ import { audioInput } from "../audio/mod.ts"
 import { FRAMES_PER_BUFFER, SAMPLE_RATE } from "../constants.ts"
 import { cancellationTimeout } from "../util/setCancellationTimeout.ts"
 
-// Collect 5 seconds of audio.
 const buffers = await Array.fromAsync(cancellationTimeout(audioInput(), 5_000))
 
 PortAudio.initialize()
