@@ -1,28 +1,16 @@
-import { conn, Session } from "galatea"
+import { conn, SAMPLE_RATE, Session, TEST_PROMPT } from "galatea"
 import "@std/dotenv/load"
-import { audioCtx, audioOutput } from "./_common/play.ts"
+import { AudioContext } from "@mutefish/web-audio-api"
+import { audioOutput } from "../audio_util/mod.ts"
 
-const session = Session(() => conn(Deno.env.get("OPENAI_API_KEY")!))
+const session = new Session(() => conn(Deno.env.get("OPENAI_API_KEY")!), {
+  turnDetection: false,
+})
 
-function transformer(chunks: Int16Array[]) {
-  const pcmData = chunks.flatMap((v) => Array.from(v).map((i) => i / 32768))
-  const audioBuffer = audioCtx.createBuffer(1, pcmData.length, 24_000)
-  audioBuffer.getChannelData(0).set(pcmData)
-  return audioBuffer
-}
+const audioCtx = new AudioContext({ sampleRate: SAMPLE_RATE })
 
-session
-  .audio()
-  .pipeThrough(
-    new TransformStream<Int16Array[], AudioBuffer>({
-      transform(chunk, ctl) {
-        ctl.enqueue(transformer(chunk))
-      },
-    }),
-  )
-  .pipeTo(audioOutput())
+session.assistant.audio().pipeTo(audioOutput(audioCtx))
 
-const textInput = session.textInput().getWriter()
-textInput.write("Tell me about Galatea from the story of Pygmalion")
-textInput.releaseLock()
-session.respond()
+session.user.write(TEST_PROMPT)
+
+setTimeout(() => session.end(), 5_000)

@@ -27,31 +27,22 @@ PortAudio.startStream(inputStream)
 console.log("=== Now recording!! Please speak into the microphone. ===")
 
 const TOTAL_SAMPLES = NUM_SECONDS * SAMPLE_RATE * NUM_CHANNELS
-const audioBuffer = new Int32Array(TOTAL_SAMPLES + FRAMES_PER_BUFFER)
+const buf = new Int32Array(TOTAL_SAMPLES + FRAMES_PER_BUFFER)
 
 let recorded = 0
 
 while (recorded < TOTAL_SAMPLES) {
   const available = PortAudio.getStreamReadAvailable(inputStream)
-
   if (available > FRAMES_PER_BUFFER) {
     const buffer = new Int32Array(FRAMES_PER_BUFFER)
     PortAudio.readStream(inputStream, buffer, FRAMES_PER_BUFFER)
-
-    audioBuffer.set(buffer, recorded)
-
+    buf.set(buffer, recorded)
     recorded += FRAMES_PER_BUFFER as number
   }
 }
 
-console.log(
-  `Recorded ${Math.round(audioBuffer.length / SAMPLE_RATE)} seconds of audio`,
-)
-
 PortAudio.closeStream(inputStream)
 PortAudio.terminate()
-
-console.log("=== Saving the file to demo.wav... please wait a bit. ===")
 
 // Implemented based on the following resources
 // https://isip.piconepress.com/projects/speech/software/tutorials/production/fundamentals/v1.0/section_02/s02_01_p05.html
@@ -74,7 +65,7 @@ view.setInt32(36, 0x64617461) // "data"
 view.setInt32(40, TOTAL_SAMPLES * 4, true) // number of bytes in rest of data
 
 for (let i = 0; i < TOTAL_SAMPLES; i++) {
-  view.setInt32(44 + (i * 4), audioBuffer[i]!, true)
+  view.setInt32(44 + (i * 4), buf[i]!, true)
 }
 
 Deno.writeFile("demo.wav", new Uint8Array(fileBuffer))

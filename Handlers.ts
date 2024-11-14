@@ -4,12 +4,11 @@ import type { ServerEvents } from "./events/mod.ts"
 import type { ErrorDetails, ItemResource, SessionResource } from "./models/mod.ts"
 import { Listeners } from "./util/Listeners.ts"
 
-export class Context {
+export class SessionState {
   sessionResource?: SessionResource
   previous_item_id?: string
 
   itemLookup: Record<string, ItemResource> = {}
-  itemAudio = new WeakMap<ItemResource, Int16Array[]>()
 
   textListeners
   inputTextListeners
@@ -18,7 +17,7 @@ export class Context {
   constructor(readonly signal: AbortSignal) {
     this.textListeners = new Listeners<string>(signal)
     this.inputTextListeners = new Listeners<string>(signal)
-    this.audioListeners = new Listeners<Int16Array[]>(signal)
+    this.audioListeners = new Listeners<Int16Array>(signal)
     this.errorListeners = new Listeners<ErrorDetails>(signal)
   }
 }
@@ -28,6 +27,7 @@ export const handlers: Handlers = {
     this.errorListeners.enqueue(() => error)
   },
   "session.created"({ session }) {
+    console.log(session)
     this.sessionResource = session
   },
   "session.updated"({ session }) {
@@ -51,19 +51,20 @@ export const handlers: Handlers = {
   "response.audio.delta"({ item_id, delta }) {
     const item = this.itemLookup[item_id]
     assertExists(item)
-    let audio = this.itemAudio.get(item)
-    if (!audio) {
-      audio = []
-      this.itemAudio.set(item, audio)
-    }
-    audio.push(new Int16Array(decodeBase64(delta).buffer))
+    this.audioListeners.enqueue(() => new Int16Array(decodeBase64(delta).buffer))
+    // let audio = this.itemAudio.get(item)
+    // if (!audio) {
+    //   audio = []
+    //   this.itemAudio.set(item, audio)
+    // }
+    // audio.push(new Int16Array(decodeBase64(delta).buffer))
   },
   "response.audio.done"({ item_id }) {
-    const item = this.itemLookup[item_id]
-    assertExists(item)
-    const audio = this.itemAudio.get(item)
-    assertExists(audio)
-    this.audioListeners.enqueue(() => audio)
+    // const item = this.itemLookup[item_id]
+    // assertExists(item)
+    // const audio = this.itemAudio.get(item)
+    // assertExists(audio)
+    // this.audioListeners.enqueue(() => audio)
     delete this.itemLookup[item_id]
   },
   "response.audio_transcript.delta"({ delta }) {
@@ -83,4 +84,4 @@ export const handlers: Handlers = {
 }
 
 export type Handlers = { [K in keyof ServerEvents]: Handler<K> }
-export type Handler<K extends keyof ServerEvents> = (this: Context, args: ServerEvents[K]) => void | Promise<void>
+export type Handler<K extends keyof ServerEvents> = (this: SessionState, args: ServerEvents[K]) => void | Promise<void>

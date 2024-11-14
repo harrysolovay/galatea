@@ -1,35 +1,33 @@
+import { audioInput } from "audio-util"
 import { conn, Session } from "galatea"
 import "@std/dotenv/load"
 
-const session = Session(() => conn(Deno.env.get("OPENAI_API_KEY")!), {
-  inputTranscript: true,
-})
+const session = new Session(() => conn(Deno.env.get("OPENAI_API_KEY")!))
 
-let ctl: AbortController | undefined
+let input: undefined | ReadableStream<Float32Array>
+
 toggleAudioInput()
 
 {
   ;(async () => {
-    for await (const token of session.text()) {
+    for await (const token of session.assistant.text()) {
       Deno.stdout.write(new TextEncoder().encode(token))
     }
   })()
 }
 
-function toggleTurnDetection() {
-  const turnDetection = !session.turnDetection()
+function _toggleTurnDetection() {
+  const turnDetection = !!session.state.sessionResource?.turn_detection
   session.update({ turnDetection })
-  if (turnDetection !== !!ctl) toggleAudioInput()
+  if (turnDetection !== !!input) toggleAudioInput()
 }
 
 function toggleAudioInput() {
-  if (ctl) {
-    ctl.abort()
-    ctl = undefined
+  if (input) {
+    input.cancel()
+    input = undefined
   } else {
-    ctl = new AbortController()
-    audioInput(ctl.signal).pipeTo(session.audioInput())
+    input = audioInput()
+    input.pipeTo(session.user.writeable())
   }
 }
-
-declare function audioInput(signal: AbortSignal): ReadableStream<Int16Array>

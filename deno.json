@@ -31,6 +31,7 @@
     "@types/json-schema": "npm:@types/json-schema@^7.0.15",
     "@vitejs/plugin-react-swc": "npm:@vitejs/plugin-react-swc@^3.7.1",
     "audio-decode": "npm:audio-decode@^2.2.2",
+    "audio-util": "./audio_util/mod.ts",
     "openai": "npm:openai@^4.68.1",
     "portaudio": "https://deno.land/x/portaudio@0.2.0/mod.ts",
     "structured-outputs": "npm:structured-outputs@^0.1.0-beta.6"

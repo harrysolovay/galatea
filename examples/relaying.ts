@@ -1,28 +1,17 @@
-import { delay } from "@std/async"
 import { conn, Session } from "galatea"
 import "@std/dotenv/load"
-import { unimplemented } from "@std/assert"
 import { parseArgs } from "@std/cli"
+import { audioInput } from "audio-util"
 
 const { port } = parseArgs(Deno.args, { string: ["port"] })
 
 if (port) {
-  const session = Session(() => new WebSocket(`ws://localhost:${port}`))
-  const ctl = new AbortController()
-  audioInput(ctl.signal).pipeTo(session.audioInput())
-  ;(async () => {
-    for await (const token of session.transcript()) {
-      Deno.stdout.write(new TextEncoder().encode(token))
-    }
-  })()
-  await delay(10_000).then(() => {
-    ctl.abort()
-    session.end()
-  })
-
-  function audioInput(_signal: AbortSignal): ReadableStream<Int16Array> {
-    unimplemented()
-  }
+  const session = new Session(() => new WebSocket(`ws://localhost:${port}`))
+  audioInput().pipeTo(session.user.writeable())
+  session.assistant
+    .text()
+    .pipeThrough(new TextEncoderStream())
+    .pipeTo(Deno.stdout.writable)
 }
 
 const server = Deno.serve((req) => {
