@@ -19,7 +19,9 @@ toggleAudioInput()
 function _toggleTurnDetection() {
   const turnDetection = !session.turnDetection()
   session.update({ turnDetection })
-  if (turnDetection !== !!input) toggleAudioInput()
+  if (turnDetection !== !!input) {
+    toggleAudioInput()
+  }
 }
 
 function toggleAudioInput() {
@@ -28,6 +30,6 @@ function toggleAudioInput() {
     input = undefined
   } else {
     input = audioInput()
-    input.pipeTo(session.user.writeable())
+    input.pipeTo(session.user.writeable(125))
   }
 }

@@ -29,9 +29,11 @@
     "@std/testing": "jsr:@std/testing@^1.0.3",
     "@std/text": "jsr:@std/text@^1.0.7",
     "@types/json-schema": "npm:@types/json-schema@^7.0.15",
+    "@types/node-wav": "npm:@types/node-wav@^0.0.3",
     "@vitejs/plugin-react-swc": "npm:@vitejs/plugin-react-swc@^3.7.1",
     "audio-decode": "npm:audio-decode@^2.2.2",
     "audio-util": "./audio_util/mod.ts",
+    "node-wav": "npm:node-wav@^0.0.2",
     "openai": "npm:openai@^4.68.1",
     "portaudio": "https://deno.land/x/portaudio@0.2.0/mod.ts",
     "structured-outputs": "npm:structured-outputs@^0.1.0-beta.6"
@@ -40,6 +42,14 @@
     "./examples/": {
       "galatea": "./mod.ts"
     }
+  },
+  "compilerOptions": {
+    "lib": ["deno.window", "dom", "dom.iterable"],
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   },
   "lint": {
     "rules": {
@@ -53,13 +63,5 @@
         "no-namespace"
       ]
     }
-  },
-  "compilerOptions": {
-    "lib": ["deno.window", "dom", "dom.iterable"],
-    "noFallthroughCasesInSwitch": true,
-    "noPropertyAccessFromIndexSignature": false,
-    "noUncheckedIndexedAccess": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "react"
   }
 }

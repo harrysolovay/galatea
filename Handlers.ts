@@ -54,7 +54,7 @@ export const handlers: Handlers = {
     delete this.itemLookup[item_id]
   },
   "response.audio_transcript.delta"({ delta }) {
-    this.userAudioTranscriptListeners.enqueue(() => delta)
+    this.assistantTextListeners.enqueue(() => delta)
   },
   "response.audio_transcript.done"() {},
   "response.content_part.added"() {},

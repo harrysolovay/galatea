@@ -15,9 +15,7 @@ export class Session {
   constructor(readonly connect: () => WebSocket, config?: SessionConfig) {
     this.send = listen<ClientEvent, ServerEvent>(
       connect,
-      (event) => {
-        return handlers[event.type].call(this.state, event as never)
-      },
+      (event) => handlers[event.type].call(this.state, event as never),
       this.state.ctl.signal,
     )
     if (config) {

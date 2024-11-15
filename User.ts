@@ -1,3 +1,4 @@
+import { assert } from "@std/assert"
 import { base64EncodeAudio } from "./audio/encodePcm.ts"
 import type { Content } from "./models/mod.ts"
 import type { Session } from "./Session.ts"
@@ -6,10 +7,16 @@ export class User {
   constructor(private session: Session) {}
 
   /** Get a writable stream to which text and audio chunks can be written. */
-  writeable(): WritableStream<string | Float32Array> {
+  writeable(commitInterval = 10): WritableStream<string | Float32Array> {
+    assert(commitInterval >= 1)
+    let i = 0
     return new WritableStream({
       write: (value) => {
         this.write(value)
+        i += 1
+        if (i % commitInterval === 0) {
+          this.commit()
+        }
       },
     })
   }
@@ -27,6 +34,10 @@ export class User {
         audio: base64EncodeAudio(value),
       })
     }
+  }
+
+  commit() {
+    this.session.send({ type: "input_audio_buffer.commit" })
   }
 
   /** Get a readable stream of the user audio transcript. */
