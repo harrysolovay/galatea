@@ -32,7 +32,7 @@
     "@types/node-wav": "npm:@types/node-wav@^0.0.3",
     "@vitejs/plugin-react-swc": "npm:@vitejs/plugin-react-swc@^3.7.1",
     "audio-decode": "npm:audio-decode@^2.2.2",
-    "audio-util": "./audio_util/mod.ts",
+    "audio": "./audio/mod.ts",
     "node-wav": "npm:node-wav@^0.0.2",
     "openai": "npm:openai@^4.68.1",
     "portaudio": "https://deno.land/x/portaudio@0.2.0/mod.ts",
