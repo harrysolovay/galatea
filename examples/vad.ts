@@ -18,7 +18,7 @@ function audioInput() {
   })()
 }
 
-audioInput().pipeTo(session.user.writeable()
+audioInput().pipeTo(session.user.writeable())
 
 setTimeout(() => {
   session.user.commit()
